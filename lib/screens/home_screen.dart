@@ -1,0 +1,73 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/controllers_mixin.dart';
+import '../extensions/extensions.dart';
+import '../models/municipal_model.dart';
+import '../models/station_model.dart';
+import '../models/temple_lat_lng_model.dart';
+import '../models/temple_list_model.dart';
+import '../models/temple_model.dart';
+import 'left_screen.dart';
+import 'right_screen.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({
+    super.key,
+    required this.templeList,
+    required this.templeLatLngList,
+    required this.templeLatLngMap,
+    required this.stationMap,
+    required this.tokyoMunicipalList,
+    required this.tokyoMunicipalMap,
+    required this.templeListMap,
+    required this.templeListList,
+  });
+
+  final List<TempleModel> templeList;
+  final List<TempleLatLngModel> templeLatLngList;
+  final Map<String, TempleLatLngModel> templeLatLngMap;
+  final Map<String, StationModel> stationMap;
+  final List<MunicipalModel> tokyoMunicipalList;
+  final Map<String, MunicipalModel> tokyoMunicipalMap;
+  final Map<String, TempleListModel> templeListMap;
+  final List<TempleListModel> templeListList;
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<HomeScreen> {
+  ///
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      getDataNotifier.setKeepTempleList(list: widget.templeList);
+      getDataNotifier.setKeepTempleLatLngList(list: widget.templeLatLngList);
+      getDataNotifier.setKeepTempleLatLngMap(map: widget.templeLatLngMap);
+      getDataNotifier.setKeepStationMap(map: widget.stationMap);
+      getDataNotifier.setKeepTokyoMunicipalList(list: widget.tokyoMunicipalList);
+      getDataNotifier.setKeepTokyoMunicipalMap(map: widget.tokyoMunicipalMap);
+      getDataNotifier.setKeepTempleListMap(map: widget.templeListMap);
+      getDataNotifier.setKeepTempleListList(list: widget.templeListList);
+    });
+
+    return Scaffold(
+      body: SafeArea(
+        child: Row(
+          children: <Widget>[
+            Container(
+              decoration: const BoxDecoration(
+                border: Border(right: BorderSide(color: Colors.white, width: 5)),
+              ),
+
+              width: context.screenSize.width * 0.1,
+              child: const LeftScreen(),
+            ),
+
+            const Expanded(child: RightScreen()),
+          ],
+        ),
+      ),
+    );
+  }
+}
