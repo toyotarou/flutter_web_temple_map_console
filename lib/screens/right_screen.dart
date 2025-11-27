@@ -98,7 +98,10 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
       templeMarkerList.add(
         Marker(
           point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
-          child: const CircleAvatar(backgroundColor: Colors.redAccent),
+          child: CircleAvatar(
+            backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
+            child: Text(value.rank, style: TextStyle(color: Colors.white, fontSize: 20)),
+          ),
         ),
       );
     });

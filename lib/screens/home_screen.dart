@@ -60,7 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
                 border: Border(right: BorderSide(color: Colors.white, width: 5)),
               ),
 
-              width: context.screenSize.width * 0.1,
+              width: context.screenSize.width * 0.2,
               child: const LeftScreen(),
             ),
 
