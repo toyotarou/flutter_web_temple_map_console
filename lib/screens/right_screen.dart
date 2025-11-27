@@ -24,7 +24,9 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
   List<SpotDataModel> spotDataModelList = <SpotDataModel>[];
 
-  List<Marker> selectedSpotsMarkerList = <Marker>[];
+  List<Marker> matchedSpotsMarkerList = <Marker>[];
+
+  List<Marker> notMatchedSpotsMarkerList = <Marker>[];
 
   ///
   @override
@@ -55,7 +57,9 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
               children: <Widget>[
                 TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
 
-                if (selectedSpotsMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: selectedSpotsMarkerList)],
+                if (matchedSpotsMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: matchedSpotsMarkerList)],
+
+                if (notMatchedSpotsMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: notMatchedSpotsMarkerList)],
               ],
             ),
           ),
@@ -85,16 +89,59 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
       appParamNotifier.setIsMapCenterMove(flag: true);
 
-      makeSelectedSpotsMarkerList();
+      makeMatchedSpotsMarkerList();
     });
   }
 
   ///
-  void makeSelectedSpotsMarkerList() {
+  void makeMatchedSpotsMarkerList() {
     for (final SpotDataModel element in spotDataModelList) {
-      selectedSpotsMarkerList.add(
+      matchedSpotsMarkerList.add(
         Marker(point: LatLng(element.latitude.toDouble(), element.longitude.toDouble()), child: const CircleAvatar()),
       );
     }
+
+    makeNotMatchedSpotsMarkerList();
+  }
+
+  ///
+  void makeNotMatchedSpotsMarkerList() {
+    final List<String> list = <String>[];
+    final List<String> list2 = <String>[];
+
+    for (final SpotDataModel element in spotDataModelList) {
+      list.add('${element.latitude}|${element.longitude}');
+
+      list2.add(element.name);
+    }
+
+    getDataState.keepTempleList.where((TempleModel a) => a.date.yyyymmdd != appParamState.selectedDate).forEach((
+      TempleModel element,
+    ) {
+      final Map<String, dynamic> dailySpotDataInfo = getDailySpotDataInfo(
+        templeModel: element,
+        templeLatLngMap: getDataState.keepTempleLatLngMap,
+        stationMap: getDataState.keepStationMap,
+        tokyoMunicipalList: getDataState.keepTokyoMunicipalList,
+        templeListMap: getDataState.keepTempleListMap,
+      );
+
+      final List<SpotDataModel> templeDataList = dailySpotDataInfo['templeDataList'] as List<SpotDataModel>;
+
+      for (final SpotDataModel element2 in templeDataList) {
+        if (!list.contains('${element2.latitude}|${element2.longitude}')) {
+          if (!list2.contains(element2.name)) {
+            if (element2.type == 'temple') {
+              notMatchedSpotsMarkerList.add(
+                Marker(
+                  point: LatLng(element2.latitude.toDouble(), element2.longitude.toDouble()),
+                  child: const CircleAvatar(backgroundColor: Colors.redAccent),
+                ),
+              );
+            }
+          }
+        }
+      }
+    });
   }
 }
