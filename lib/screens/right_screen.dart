@@ -29,6 +29,8 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
   List<Marker> templeMarkerList = <Marker>[];
 
+  SpotDataModel? selectedSpotDataModel;
+
   ///
   @override
   Widget build(BuildContext context) {
@@ -41,26 +43,52 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     return SafeArea(
       child: Column(
         children: <Widget>[
-          SizedBox(
-            height: context.screenSize.height,
-            child: FlutterMap(
-              mapController: mapController,
-              options: MapOptions(
-                initialCenter: const LatLng(35.718532, 139.586639),
-                initialZoom: currentZoomEightTeen,
-                onPositionChanged: (MapCamera position, bool isMoving) {
-                  if (isMoving) {
-                    appParamNotifier.setCurrentZoom(zoom: position.zoom);
-                  }
-                },
+          Stack(
+            children: <Widget>[
+              SizedBox(
+                height: context.screenSize.height,
+                child: FlutterMap(
+                  mapController: mapController,
+                  options: MapOptions(
+                    initialCenter: const LatLng(35.718532, 139.586639),
+                    initialZoom: currentZoomEightTeen,
+                    onPositionChanged: (MapCamera position, bool isMoving) {
+                      if (isMoving) {
+                        appParamNotifier.setCurrentZoom(zoom: position.zoom);
+                      }
+                    },
+                  ),
+
+                  children: <Widget>[
+                    TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+
+                    if (templeMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: templeMarkerList)],
+                  ],
+                ),
               ),
 
-              children: <Widget>[
-                TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.4),
 
-                if (templeMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: templeMarkerList)],
-              ],
-            ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                width: double.infinity,
+                height: 130,
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
+
+                child: (selectedSpotDataModel != null)
+                    ? DefaultTextStyle(
+                        style: const TextStyle(fontSize: 20, color: Colors.white),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[Text(selectedSpotDataModel!.name)],
+                        ),
+                      )
+                    : null,
+              ),
+            ],
           ),
         ],
       ),
@@ -98,9 +126,22 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
       templeMarkerList.add(
         Marker(
           point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
-          child: CircleAvatar(
-            backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
-            child: Text(value.rank, style: TextStyle(color: Colors.white, fontSize: 20)),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedSpotDataModel = SpotDataModel(
+                  type: '',
+                  name: value.temple,
+                  address: value.address,
+                  latitude: value.lat,
+                  longitude: value.lng,
+                );
+              });
+            },
+            child: CircleAvatar(
+              backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
+              child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
+            ),
           ),
         ),
       );
