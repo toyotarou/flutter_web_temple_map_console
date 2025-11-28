@@ -26,6 +26,10 @@ mixin _$AppParamState {
   ///
   bool get isMapCenterMove => throw _privateConstructorUsedError;
 
+  ///
+  SpotDataModel? get selectedSpotDataModel =>
+      throw _privateConstructorUsedError;
+
   /// Create a copy of AppParamState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -43,7 +47,8 @@ abstract class $AppParamStateCopyWith<$Res> {
       {double currentZoom,
       int currentPaddingIndex,
       String selectedDate,
-      bool isMapCenterMove});
+      bool isMapCenterMove,
+      SpotDataModel? selectedSpotDataModel});
 }
 
 /// @nodoc
@@ -65,6 +70,7 @@ class _$AppParamStateCopyWithImpl<$Res, $Val extends AppParamState>
     Object? currentPaddingIndex = null,
     Object? selectedDate = null,
     Object? isMapCenterMove = null,
+    Object? selectedSpotDataModel = freezed,
   }) {
     return _then(_value.copyWith(
       currentZoom: null == currentZoom
@@ -83,6 +89,10 @@ class _$AppParamStateCopyWithImpl<$Res, $Val extends AppParamState>
           ? _value.isMapCenterMove
           : isMapCenterMove // ignore: cast_nullable_to_non_nullable
               as bool,
+      selectedSpotDataModel: freezed == selectedSpotDataModel
+          ? _value.selectedSpotDataModel
+          : selectedSpotDataModel // ignore: cast_nullable_to_non_nullable
+              as SpotDataModel?,
     ) as $Val);
   }
 }
@@ -99,7 +109,8 @@ abstract class _$$AppParamStateImplCopyWith<$Res>
       {double currentZoom,
       int currentPaddingIndex,
       String selectedDate,
-      bool isMapCenterMove});
+      bool isMapCenterMove,
+      SpotDataModel? selectedSpotDataModel});
 }
 
 /// @nodoc
@@ -119,6 +130,7 @@ class __$$AppParamStateImplCopyWithImpl<$Res>
     Object? currentPaddingIndex = null,
     Object? selectedDate = null,
     Object? isMapCenterMove = null,
+    Object? selectedSpotDataModel = freezed,
   }) {
     return _then(_$AppParamStateImpl(
       currentZoom: null == currentZoom
@@ -137,6 +149,10 @@ class __$$AppParamStateImplCopyWithImpl<$Res>
           ? _value.isMapCenterMove
           : isMapCenterMove // ignore: cast_nullable_to_non_nullable
               as bool,
+      selectedSpotDataModel: freezed == selectedSpotDataModel
+          ? _value.selectedSpotDataModel
+          : selectedSpotDataModel // ignore: cast_nullable_to_non_nullable
+              as SpotDataModel?,
     ));
   }
 }
@@ -148,7 +164,8 @@ class _$AppParamStateImpl implements _AppParamState {
       {this.currentZoom = 0,
       this.currentPaddingIndex = 5,
       this.selectedDate = '',
-      this.isMapCenterMove = false});
+      this.isMapCenterMove = false,
+      this.selectedSpotDataModel});
 
   ///
   @override
@@ -168,9 +185,13 @@ class _$AppParamStateImpl implements _AppParamState {
   @JsonKey()
   final bool isMapCenterMove;
 
+  ///
+  @override
+  final SpotDataModel? selectedSpotDataModel;
+
   @override
   String toString() {
-    return 'AppParamState(currentZoom: $currentZoom, currentPaddingIndex: $currentPaddingIndex, selectedDate: $selectedDate, isMapCenterMove: $isMapCenterMove)';
+    return 'AppParamState(currentZoom: $currentZoom, currentPaddingIndex: $currentPaddingIndex, selectedDate: $selectedDate, isMapCenterMove: $isMapCenterMove, selectedSpotDataModel: $selectedSpotDataModel)';
   }
 
   @override
@@ -185,12 +206,14 @@ class _$AppParamStateImpl implements _AppParamState {
             (identical(other.selectedDate, selectedDate) ||
                 other.selectedDate == selectedDate) &&
             (identical(other.isMapCenterMove, isMapCenterMove) ||
-                other.isMapCenterMove == isMapCenterMove));
+                other.isMapCenterMove == isMapCenterMove) &&
+            (identical(other.selectedSpotDataModel, selectedSpotDataModel) ||
+                other.selectedSpotDataModel == selectedSpotDataModel));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, currentZoom, currentPaddingIndex,
-      selectedDate, isMapCenterMove);
+      selectedDate, isMapCenterMove, selectedSpotDataModel);
 
   /// Create a copy of AppParamState
   /// with the given fields replaced by the non-null parameter values.
@@ -206,7 +229,8 @@ abstract class _AppParamState implements AppParamState {
       {final double currentZoom,
       final int currentPaddingIndex,
       final String selectedDate,
-      final bool isMapCenterMove}) = _$AppParamStateImpl;
+      final bool isMapCenterMove,
+      final SpotDataModel? selectedSpotDataModel}) = _$AppParamStateImpl;
 
   ///
   @override
@@ -221,6 +245,10 @@ abstract class _AppParamState implements AppParamState {
   ///
   @override
   bool get isMapCenterMove;
+
+  ///
+  @override
+  SpotDataModel? get selectedSpotDataModel;
 
   /// Create a copy of AppParamState
   /// with the given fields replaced by the non-null parameter values.

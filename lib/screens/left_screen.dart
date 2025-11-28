@@ -33,6 +33,8 @@ class _LeftScreenState extends ConsumerState<LeftScreen> with ControllersMixin<L
               appParamNotifier.setIsMapCenterMove(flag: false);
 
               appParamNotifier.setSelectedDate(date: element.date.yyyymmdd);
+
+              appParamNotifier.setSelectedSpotDataModel();
             },
 
             child: Text(element.date.yyyymmdd),

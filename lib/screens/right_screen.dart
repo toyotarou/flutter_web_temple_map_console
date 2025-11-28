@@ -25,11 +25,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
   List<SpotDataModel> spotDataModelList = <SpotDataModel>[];
 
-  List<Marker> matchedSpotsMarkerList = <Marker>[];
-
   List<Marker> templeMarkerList = <Marker>[];
-
-  SpotDataModel? selectedSpotDataModel;
 
   ///
   @override
@@ -67,26 +63,50 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                 ),
               ),
 
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.4),
+              Positioned(
+                top: 10,
+                right: 10,
+                left: 10,
 
-                  borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.4),
+
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  width: double.infinity,
+                  height: 130,
+
+                  padding: const EdgeInsets.all(10),
+
+                  child: DefaultTextStyle(
+                    style: const TextStyle(fontSize: 20, color: Colors.white),
+                    child: (appParamState.selectedSpotDataModel != null)
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[Text(appParamState.selectedSpotDataModel!.name)],
+                          )
+                        : (spotDataModelList.isNotEmpty)
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(appParamState.selectedDate),
+
+                              Expanded(
+                                child: ListView.builder(
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return (spotDataModelList[index].type == 'temple')
+                                        ? Text(spotDataModelList[index].name)
+                                        : const SizedBox.shrink();
+                                  },
+                                  itemCount: spotDataModelList.length,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                 ),
-                width: double.infinity,
-                height: 130,
-                margin: const EdgeInsets.all(10),
-                padding: const EdgeInsets.all(10),
-
-                child: (selectedSpotDataModel != null)
-                    ? DefaultTextStyle(
-                        style: const TextStyle(fontSize: 20, color: Colors.white),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[Text(selectedSpotDataModel!.name)],
-                        ),
-                      )
-                    : null,
               ),
             ],
           ),
@@ -128,15 +148,15 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
           point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
           child: GestureDetector(
             onTap: () {
-              setState(() {
-                selectedSpotDataModel = SpotDataModel(
+              appParamNotifier.setSelectedSpotDataModel(
+                value: SpotDataModel(
                   type: '',
                   name: value.temple,
                   address: value.address,
                   latitude: value.lat,
                   longitude: value.lng,
-                );
-              });
+                ),
+              );
             },
             child: CircleAvatar(
               backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
