@@ -37,7 +37,23 @@ class _LeftScreenState extends ConsumerState<LeftScreen> with ControllersMixin<L
               appParamNotifier.setSelectedSpotDataModel();
             },
 
-            child: Text(element.date.yyyymmdd),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+
+                borderRadius: BorderRadius.circular(10),
+              ),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(element.date.yyyymmdd),
+                  Text(element.temple),
+
+                  if (element.memo != '') ...<Widget>[Text(element.memo, style: const TextStyle(color: Colors.grey))],
+                ],
+              ),
+            ),
           ),
         ),
       );

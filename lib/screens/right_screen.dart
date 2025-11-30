@@ -21,11 +21,13 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
   double? currentZoom;
 
-  double currentZoomEightTeen = 18;
+  double currentZoomEightTeen = 15;
 
-  List<SpotDataModel> spotDataModelList = <SpotDataModel>[];
+  List<SpotDataModel> selectedSpotDataModelList = <SpotDataModel>[];
 
   List<Marker> templeMarkerList = <Marker>[];
+
+  List<Marker> selectedSpotDataModelMarkerList = <Marker>[];
 
   ///
   @override
@@ -54,31 +56,29 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                       }
                     },
                   ),
-
                   children: <Widget>[
                     TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+
+                    if (selectedSpotDataModelMarkerList.isNotEmpty) ...<Widget>[
+                      MarkerLayer(markers: selectedSpotDataModelMarkerList),
+                    ],
 
                     if (templeMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: templeMarkerList)],
                   ],
                 ),
               ),
-
               Positioned(
                 top: 10,
                 right: 10,
                 left: 10,
-
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.4),
-
                     borderRadius: BorderRadius.circular(10),
                   ),
                   width: double.infinity,
                   height: 130,
-
                   padding: const EdgeInsets.all(10),
-
                   child: DefaultTextStyle(
                     style: const TextStyle(fontSize: 20, color: Colors.white),
                     child: (appParamState.selectedSpotDataModel != null)
@@ -86,20 +86,19 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[Text(appParamState.selectedSpotDataModel!.name)],
                           )
-                        : (spotDataModelList.isNotEmpty)
+                        : (selectedSpotDataModelList.isNotEmpty)
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(appParamState.selectedDate),
-
                               Expanded(
                                 child: ListView.builder(
                                   itemBuilder: (BuildContext context, int index) {
-                                    return (spotDataModelList[index].type == 'temple')
-                                        ? Text(spotDataModelList[index].name)
+                                    return (selectedSpotDataModelList[index].type == 'temple')
+                                        ? Text(selectedSpotDataModelList[index].name)
                                         : const SizedBox.shrink();
                                   },
-                                  itemCount: spotDataModelList.length,
+                                  itemCount: selectedSpotDataModelList.length,
                                 ),
                               ),
                             ],
@@ -128,23 +127,28 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
         templeListMap: getDataState.keepTempleListMap,
       );
 
-      spotDataModelList = dailySpotDataInfo['templeDataList'] as List<SpotDataModel>;
+      selectedSpotDataModelList = dailySpotDataInfo['templeDataList'] as List<SpotDataModel>;
 
-      final SpotDataModel firstTempleSpotData = spotDataModelList[1];
+      final SpotDataModel firstTempleSpotData = selectedSpotDataModelList[1];
 
-      mapController.move(LatLng(firstTempleSpotData.latitude.toDouble(), firstTempleSpotData.longitude.toDouble()), 16);
+      mapController.move(LatLng(firstTempleSpotData.latitude.toDouble(), firstTempleSpotData.longitude.toDouble()), 15);
 
       appParamNotifier.setIsMapCenterMove(flag: true);
 
       makeTempleMarkerList();
+      makeSelectedSpotDataModelMarkerList();
     });
   }
 
   ///
   void makeTempleMarkerList() {
+    templeMarkerList.clear();
+
     getDataState.keepTempleLatLngMap.forEach((String key, TempleLatLngModel value) {
       templeMarkerList.add(
         Marker(
+          width: 40,
+          height: 40,
           point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
           child: GestureDetector(
             onTap: () {
@@ -166,5 +170,30 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
         ),
       );
     });
+  }
+
+  ///
+  void makeSelectedSpotDataModelMarkerList() {
+    selectedSpotDataModelMarkerList.clear();
+
+    for (final SpotDataModel element in selectedSpotDataModelList) {
+      selectedSpotDataModelMarkerList.add(
+        Marker(
+          width: 50,
+          height: 50,
+          alignment: Alignment.center,
+          point: LatLng(element.latitude.toDouble(), element.longitude.toDouble()),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.redAccent, width: 3),
+            ),
+            child: const Center(child: Text('')),
+          ),
+        ),
+      );
+    }
   }
 }
