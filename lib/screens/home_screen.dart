@@ -37,6 +37,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<HomeScreen> {
+  List<List<List<List<double>>>>? allPolygons = <List<List<List<double>>>>[];
+
   ///
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
       getDataNotifier.setKeepTokyoMunicipalMap(map: widget.tokyoMunicipalMap);
       getDataNotifier.setKeepTempleListMap(map: widget.templeListMap);
       getDataNotifier.setKeepTempleListList(list: widget.templeListList);
+
+      for (final MunicipalModel element in widget.tokyoMunicipalList) {
+        allPolygons?.addAll(element.polygons);
+      }
     });
 
     return Scaffold(
@@ -64,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
               child: const LeftScreen(),
             ),
 
-            const Expanded(child: RightScreen()),
+            Expanded(child: RightScreen(allPolygons: allPolygons)),
           ],
         ),
       ),

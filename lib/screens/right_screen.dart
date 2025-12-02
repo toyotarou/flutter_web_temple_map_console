@@ -8,9 +8,13 @@ import '../models/common/spot_data_model.dart';
 import '../models/temple_lat_lng_model.dart';
 import '../models/temple_model.dart';
 import '../utility/daily_spot_data_functions.dart';
+import '../utility/map_functions.dart';
+import '../utility/utility.dart';
 
 class RightScreen extends ConsumerStatefulWidget {
-  const RightScreen({super.key});
+  const RightScreen({super.key, this.allPolygons});
+
+  final List<List<List<List<double>>>>? allPolygons;
 
   @override
   ConsumerState<RightScreen> createState() => _RightScreenState();
@@ -28,6 +32,8 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   List<Marker> templeMarkerList = <Marker>[];
 
   List<Marker> selectedSpotDataModelMarkerList = <Marker>[];
+
+  Utility utility = Utility();
 
   ///
   @override
@@ -58,6 +64,11 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   ),
                   children: <Widget>[
                     TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+
+                    if (widget.allPolygons != null) ...<Widget>[
+                      // ignore: always_specify_types
+                      PolygonLayer(polygons: makeAreaPolygons()),
+                    ],
 
                     // ignore: always_specify_types
                     PolylineLayer(polylines: makeDateRoutePolyline()),
@@ -94,7 +105,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(appParamState.selectedDate),
-
                               DefaultTextStyle(
                                 style: const TextStyle(fontSize: 12, color: Colors.greenAccent),
                                 child: Row(
@@ -105,7 +115,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                                   ],
                                 ),
                               ),
-
                               Expanded(
                                 child: ListView.builder(
                                   itemBuilder: (BuildContext context, int index) {
@@ -250,5 +259,42 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
           strokeWidth: 5,
         ),
     ];
+  }
+
+  ///
+  // ignore: always_specify_types
+  List<Polygon> makeAreaPolygons() {
+    // ignore: always_specify_types
+    final List<Polygon<Object>> polygonList = <Polygon<Object>>[];
+
+    final List<List<List<List<double>>>>? all = widget.allPolygons;
+
+    if (all == null || all.isEmpty) {
+      return polygonList;
+    }
+
+    final List<Color> twentyFourColor = utility.getTwentyFourColor();
+
+    final Map<String, List<List<List<double>>>> uniquePolygons = <String, List<List<List<double>>>>{};
+
+    for (final List<List<List<double>>> poly in all) {
+      final String key = poly.toString();
+      uniquePolygons[key] = poly;
+    }
+
+    int idx = 0;
+    for (final List<List<List<double>>> poly in uniquePolygons.values) {
+      final Polygon<Object>? polygon = getColorPaintPolygon(
+        polygon: poly,
+        color: twentyFourColor[idx % 24].withValues(alpha: 0.3),
+      );
+
+      if (polygon != null) {
+        polygonList.add(polygon);
+        idx++;
+      }
+    }
+
+    return polygonList;
   }
 }
