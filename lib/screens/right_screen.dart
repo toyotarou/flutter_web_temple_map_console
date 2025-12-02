@@ -59,6 +59,9 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   children: <Widget>[
                     TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
 
+                    // ignore: always_specify_types
+                    PolylineLayer(polylines: makeDateRoutePolyline()),
+
                     if (selectedSpotDataModelMarkerList.isNotEmpty) ...<Widget>[
                       MarkerLayer(markers: selectedSpotDataModelMarkerList),
                     ],
@@ -176,6 +179,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   void makeSelectedSpotDataModelMarkerList() {
     selectedSpotDataModelMarkerList.clear();
 
+    int i = 0;
     for (final SpotDataModel element in selectedSpotDataModelList) {
       selectedSpotDataModelMarkerList.add(
         Marker(
@@ -188,12 +192,51 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
             height: 50,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.redAccent, width: 3),
+              border: Border.all(color: Colors.green[900]!, width: 3),
             ),
-            child: const Center(child: Text('')),
+            child: Center(child: displayStartEndStationMark(index: i)),
           ),
         ),
       );
+
+      i++;
     }
+  }
+
+  ///
+  Widget displayStartEndStationMark({required int index}) {
+    if (index == 0) {
+      return CircleAvatar(
+        backgroundColor: Colors.green[900],
+        child: Text(selectedSpotDataModelList[index].mark, style: const TextStyle(color: Colors.white)),
+      );
+    } else {
+      if (index == selectedSpotDataModelList.length - 1) {
+        if (selectedSpotDataModelList[index].mark != 'S/E') {
+          return CircleAvatar(
+            backgroundColor: Colors.green[900],
+            child: Text(selectedSpotDataModelList[index].mark, style: const TextStyle(color: Colors.white)),
+          );
+        }
+      }
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  ///
+  // ignore: always_specify_types
+  List<Polyline> makeDateRoutePolyline() {
+    return <Polyline<Object>>[
+      for (int i = 0; i < selectedSpotDataModelList.length; i++)
+        // ignore: always_specify_types
+        Polyline(
+          points: selectedSpotDataModelList
+              .map((SpotDataModel e) => LatLng(e.latitude.toDouble(), e.longitude.toDouble()))
+              .toList(),
+          color: Colors.green[900]!,
+          strokeWidth: 5,
+        ),
+    ];
   }
 }
