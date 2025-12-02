@@ -39,10 +39,16 @@ class _LeftScreenState extends ConsumerState<LeftScreen> with ControllersMixin<L
 
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: (appParamState.selectedDate == element.date.yyyymmdd)
+                      ? Colors.yellowAccent.withValues(alpha: 0.4)
+                      : Colors.white.withValues(alpha: 0.2),
+                ),
 
                 borderRadius: BorderRadius.circular(10),
               ),
+
+              padding: const EdgeInsets.all(5),
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

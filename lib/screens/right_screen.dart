@@ -94,6 +94,18 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(appParamState.selectedDate),
+
+                              DefaultTextStyle(
+                                style: const TextStyle(fontSize: 12, color: Colors.greenAccent),
+                                child: Row(
+                                  children: <Widget>[
+                                    Text(selectedSpotDataModelList[0].name),
+                                    const SizedBox(width: 20),
+                                    Text(selectedSpotDataModelList[selectedSpotDataModelList.length - 1].name),
+                                  ],
+                                ),
+                              ),
+
                               Expanded(
                                 child: ListView.builder(
                                   itemBuilder: (BuildContext context, int index) {
