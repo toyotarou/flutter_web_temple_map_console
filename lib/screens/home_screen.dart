@@ -57,10 +57,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
 
       /////////////////////////////////
 
-      final existingTempleNames = widget.templeLatLngList.map((e) => e.temple).toSet();
+      final Set<String> existingTempleNames = widget.templeLatLngList.map((TempleLatLngModel e) => e.temple).toSet();
 
-      final filteredNotVisitTempleList = widget.templeListList
-          .where((temple) => !existingTempleNames.contains(temple.name))
+      final List<TempleListModel> filteredNotVisitTempleList = widget.templeListList
+          .where((TempleListModel temple) => !existingTempleNames.contains(temple.name))
           .toList();
 
       getDataNotifier.setKeepFilteredNotVisitTempleList(list: filteredNotVisitTempleList);

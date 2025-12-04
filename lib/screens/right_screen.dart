@@ -6,6 +6,7 @@ import '../controllers/controllers_mixin.dart';
 import '../extensions/extensions.dart';
 import '../models/common/spot_data_model.dart';
 import '../models/temple_lat_lng_model.dart';
+import '../models/temple_list_model.dart';
 import '../models/temple_model.dart';
 import '../utility/daily_spot_data_functions.dart';
 import '../utility/map_functions.dart';
@@ -98,7 +99,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                     child: (appParamState.selectedSpotDataModel != null)
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[Text(appParamState.selectedSpotDataModel!.name)],
+                            children: <Widget>[SelectableText(appParamState.selectedSpotDataModel!.name)],
                           )
                         : (selectedSpotDataModelList.isNotEmpty)
                         ? Column(
@@ -189,6 +190,60 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
             child: CircleAvatar(
               backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
               child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
+            ),
+          ),
+        ),
+      );
+    });
+
+    for (final TempleListModel element in getDataState.keepFilteredNotVisitTempleList) {
+      templeMarkerList.add(
+        Marker(
+          width: 40,
+          height: 40,
+          point: LatLng(element.lat.toDouble(), element.lng.toDouble()),
+          child: GestureDetector(
+            onTap: () {
+              appParamNotifier.setSelectedSpotDataModel(
+                value: SpotDataModel(
+                  type: '',
+                  name: element.name,
+                  address: element.address,
+                  latitude: element.lat,
+                  longitude: element.lng,
+                ),
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: Colors.purpleAccent.withValues(alpha: 0.6),
+              child: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    getDataState.keepTempleListNavitimeMap.forEach((String key, TempleListModel value) {
+      templeMarkerList.add(
+        Marker(
+          width: 40,
+          height: 40,
+          point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
+          child: GestureDetector(
+            onTap: () {
+              appParamNotifier.setSelectedSpotDataModel(
+                value: SpotDataModel(
+                  type: '',
+                  name: value.name,
+                  address: value.address,
+                  latitude: value.lat,
+                  longitude: value.lng,
+                ),
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
+              child: const SizedBox.shrink(),
             ),
           ),
         ),
