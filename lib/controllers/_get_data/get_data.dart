@@ -28,6 +28,10 @@ class GetDataState with _$GetDataState {
 
     @Default(<String, TempleListModel>{}) Map<String, TempleListModel> keepTempleListMap,
     @Default(<TempleListModel>[]) List<TempleListModel> keepTempleListList,
+
+    @Default(<TempleListModel>[]) List<TempleListModel> keepFilteredNotVisitTempleList,
+
+    @Default(<String, TempleListModel>{}) Map<String, TempleListModel> keepTempleListNavitimeMap,
   }) = _GetDataState;
 }
 
@@ -67,4 +71,12 @@ class GetData extends _$GetData {
 
   ///
   void setKeepTempleListList({required List<TempleListModel> list}) => state = state.copyWith(keepTempleListList: list);
+
+  ///
+  void setKeepFilteredNotVisitTempleList({required List<TempleListModel> list}) =>
+      state = state.copyWith(keepFilteredNotVisitTempleList: list);
+
+  ///
+  void setKeepTempleListNavitimeMap({required Map<String, TempleListModel> map}) =>
+      state = state.copyWith(keepTempleListNavitimeMap: map);
 }

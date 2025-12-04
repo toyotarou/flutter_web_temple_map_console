@@ -31,6 +31,10 @@ mixin _$GetDataState {
       throw _privateConstructorUsedError;
   List<TempleListModel> get keepTempleListList =>
       throw _privateConstructorUsedError;
+  List<TempleListModel> get keepFilteredNotVisitTempleList =>
+      throw _privateConstructorUsedError;
+  Map<String, TempleListModel> get keepTempleListNavitimeMap =>
+      throw _privateConstructorUsedError;
 
   /// Create a copy of GetDataState
   /// with the given fields replaced by the non-null parameter values.
@@ -53,7 +57,9 @@ abstract class $GetDataStateCopyWith<$Res> {
       List<MunicipalModel> keepTokyoMunicipalList,
       Map<String, MunicipalModel> keepTokyoMunicipalMap,
       Map<String, TempleListModel> keepTempleListMap,
-      List<TempleListModel> keepTempleListList});
+      List<TempleListModel> keepTempleListList,
+      List<TempleListModel> keepFilteredNotVisitTempleList,
+      Map<String, TempleListModel> keepTempleListNavitimeMap});
 }
 
 /// @nodoc
@@ -79,6 +85,8 @@ class _$GetDataStateCopyWithImpl<$Res, $Val extends GetDataState>
     Object? keepTokyoMunicipalMap = null,
     Object? keepTempleListMap = null,
     Object? keepTempleListList = null,
+    Object? keepFilteredNotVisitTempleList = null,
+    Object? keepTempleListNavitimeMap = null,
   }) {
     return _then(_value.copyWith(
       keepTempleList: null == keepTempleList
@@ -113,6 +121,14 @@ class _$GetDataStateCopyWithImpl<$Res, $Val extends GetDataState>
           ? _value.keepTempleListList
           : keepTempleListList // ignore: cast_nullable_to_non_nullable
               as List<TempleListModel>,
+      keepFilteredNotVisitTempleList: null == keepFilteredNotVisitTempleList
+          ? _value.keepFilteredNotVisitTempleList
+          : keepFilteredNotVisitTempleList // ignore: cast_nullable_to_non_nullable
+              as List<TempleListModel>,
+      keepTempleListNavitimeMap: null == keepTempleListNavitimeMap
+          ? _value.keepTempleListNavitimeMap
+          : keepTempleListNavitimeMap // ignore: cast_nullable_to_non_nullable
+              as Map<String, TempleListModel>,
     ) as $Val);
   }
 }
@@ -133,7 +149,9 @@ abstract class _$$GetDataStateImplCopyWith<$Res>
       List<MunicipalModel> keepTokyoMunicipalList,
       Map<String, MunicipalModel> keepTokyoMunicipalMap,
       Map<String, TempleListModel> keepTempleListMap,
-      List<TempleListModel> keepTempleListList});
+      List<TempleListModel> keepTempleListList,
+      List<TempleListModel> keepFilteredNotVisitTempleList,
+      Map<String, TempleListModel> keepTempleListNavitimeMap});
 }
 
 /// @nodoc
@@ -157,6 +175,8 @@ class __$$GetDataStateImplCopyWithImpl<$Res>
     Object? keepTokyoMunicipalMap = null,
     Object? keepTempleListMap = null,
     Object? keepTempleListList = null,
+    Object? keepFilteredNotVisitTempleList = null,
+    Object? keepTempleListNavitimeMap = null,
   }) {
     return _then(_$GetDataStateImpl(
       keepTempleList: null == keepTempleList
@@ -191,6 +211,14 @@ class __$$GetDataStateImplCopyWithImpl<$Res>
           ? _value._keepTempleListList
           : keepTempleListList // ignore: cast_nullable_to_non_nullable
               as List<TempleListModel>,
+      keepFilteredNotVisitTempleList: null == keepFilteredNotVisitTempleList
+          ? _value._keepFilteredNotVisitTempleList
+          : keepFilteredNotVisitTempleList // ignore: cast_nullable_to_non_nullable
+              as List<TempleListModel>,
+      keepTempleListNavitimeMap: null == keepTempleListNavitimeMap
+          ? _value._keepTempleListNavitimeMap
+          : keepTempleListNavitimeMap // ignore: cast_nullable_to_non_nullable
+              as Map<String, TempleListModel>,
     ));
   }
 }
@@ -213,7 +241,11 @@ class _$GetDataStateImpl implements _GetDataState {
       final Map<String, TempleListModel> keepTempleListMap =
           const <String, TempleListModel>{},
       final List<TempleListModel> keepTempleListList =
-          const <TempleListModel>[]})
+          const <TempleListModel>[],
+      final List<TempleListModel> keepFilteredNotVisitTempleList =
+          const <TempleListModel>[],
+      final Map<String, TempleListModel> keepTempleListNavitimeMap =
+          const <String, TempleListModel>{}})
       : _keepTempleList = keepTempleList,
         _keepTempleLatLngList = keepTempleLatLngList,
         _keepTempleLatLngMap = keepTempleLatLngMap,
@@ -221,7 +253,9 @@ class _$GetDataStateImpl implements _GetDataState {
         _keepTokyoMunicipalList = keepTokyoMunicipalList,
         _keepTokyoMunicipalMap = keepTokyoMunicipalMap,
         _keepTempleListMap = keepTempleListMap,
-        _keepTempleListList = keepTempleListList;
+        _keepTempleListList = keepTempleListList,
+        _keepFilteredNotVisitTempleList = keepFilteredNotVisitTempleList,
+        _keepTempleListNavitimeMap = keepTempleListNavitimeMap;
 
   final List<TempleModel> _keepTempleList;
   @override
@@ -301,9 +335,29 @@ class _$GetDataStateImpl implements _GetDataState {
     return EqualUnmodifiableListView(_keepTempleListList);
   }
 
+  final List<TempleListModel> _keepFilteredNotVisitTempleList;
+  @override
+  @JsonKey()
+  List<TempleListModel> get keepFilteredNotVisitTempleList {
+    if (_keepFilteredNotVisitTempleList is EqualUnmodifiableListView)
+      return _keepFilteredNotVisitTempleList;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_keepFilteredNotVisitTempleList);
+  }
+
+  final Map<String, TempleListModel> _keepTempleListNavitimeMap;
+  @override
+  @JsonKey()
+  Map<String, TempleListModel> get keepTempleListNavitimeMap {
+    if (_keepTempleListNavitimeMap is EqualUnmodifiableMapView)
+      return _keepTempleListNavitimeMap;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_keepTempleListNavitimeMap);
+  }
+
   @override
   String toString() {
-    return 'GetDataState(keepTempleList: $keepTempleList, keepTempleLatLngList: $keepTempleLatLngList, keepTempleLatLngMap: $keepTempleLatLngMap, keepStationMap: $keepStationMap, keepTokyoMunicipalList: $keepTokyoMunicipalList, keepTokyoMunicipalMap: $keepTokyoMunicipalMap, keepTempleListMap: $keepTempleListMap, keepTempleListList: $keepTempleListList)';
+    return 'GetDataState(keepTempleList: $keepTempleList, keepTempleLatLngList: $keepTempleLatLngList, keepTempleLatLngMap: $keepTempleLatLngMap, keepStationMap: $keepStationMap, keepTokyoMunicipalList: $keepTokyoMunicipalList, keepTokyoMunicipalMap: $keepTokyoMunicipalMap, keepTempleListMap: $keepTempleListMap, keepTempleListList: $keepTempleListList, keepFilteredNotVisitTempleList: $keepFilteredNotVisitTempleList, keepTempleListNavitimeMap: $keepTempleListNavitimeMap)';
   }
 
   @override
@@ -326,7 +380,12 @@ class _$GetDataStateImpl implements _GetDataState {
             const DeepCollectionEquality()
                 .equals(other._keepTempleListMap, _keepTempleListMap) &&
             const DeepCollectionEquality()
-                .equals(other._keepTempleListList, _keepTempleListList));
+                .equals(other._keepTempleListList, _keepTempleListList) &&
+            const DeepCollectionEquality().equals(
+                other._keepFilteredNotVisitTempleList,
+                _keepFilteredNotVisitTempleList) &&
+            const DeepCollectionEquality().equals(
+                other._keepTempleListNavitimeMap, _keepTempleListNavitimeMap));
   }
 
   @override
@@ -339,7 +398,9 @@ class _$GetDataStateImpl implements _GetDataState {
       const DeepCollectionEquality().hash(_keepTokyoMunicipalList),
       const DeepCollectionEquality().hash(_keepTokyoMunicipalMap),
       const DeepCollectionEquality().hash(_keepTempleListMap),
-      const DeepCollectionEquality().hash(_keepTempleListList));
+      const DeepCollectionEquality().hash(_keepTempleListList),
+      const DeepCollectionEquality().hash(_keepFilteredNotVisitTempleList),
+      const DeepCollectionEquality().hash(_keepTempleListNavitimeMap));
 
   /// Create a copy of GetDataState
   /// with the given fields replaced by the non-null parameter values.
@@ -352,14 +413,17 @@ class _$GetDataStateImpl implements _GetDataState {
 
 abstract class _GetDataState implements GetDataState {
   const factory _GetDataState(
-      {final List<TempleModel> keepTempleList,
-      final List<TempleLatLngModel> keepTempleLatLngList,
-      final Map<String, TempleLatLngModel> keepTempleLatLngMap,
-      final Map<String, StationModel> keepStationMap,
-      final List<MunicipalModel> keepTokyoMunicipalList,
-      final Map<String, MunicipalModel> keepTokyoMunicipalMap,
-      final Map<String, TempleListModel> keepTempleListMap,
-      final List<TempleListModel> keepTempleListList}) = _$GetDataStateImpl;
+          {final List<TempleModel> keepTempleList,
+          final List<TempleLatLngModel> keepTempleLatLngList,
+          final Map<String, TempleLatLngModel> keepTempleLatLngMap,
+          final Map<String, StationModel> keepStationMap,
+          final List<MunicipalModel> keepTokyoMunicipalList,
+          final Map<String, MunicipalModel> keepTokyoMunicipalMap,
+          final Map<String, TempleListModel> keepTempleListMap,
+          final List<TempleListModel> keepTempleListList,
+          final List<TempleListModel> keepFilteredNotVisitTempleList,
+          final Map<String, TempleListModel> keepTempleListNavitimeMap}) =
+      _$GetDataStateImpl;
 
   @override
   List<TempleModel> get keepTempleList;
@@ -377,6 +441,10 @@ abstract class _GetDataState implements GetDataState {
   Map<String, TempleListModel> get keepTempleListMap;
   @override
   List<TempleListModel> get keepTempleListList;
+  @override
+  List<TempleListModel> get keepFilteredNotVisitTempleList;
+  @override
+  Map<String, TempleListModel> get keepTempleListNavitimeMap;
 
   /// Create a copy of GetDataState
   /// with the given fields replaced by the non-null parameter values.

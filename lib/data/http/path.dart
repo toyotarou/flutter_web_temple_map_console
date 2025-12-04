@@ -10,6 +10,7 @@ enum APIPath {
   insertTempleRoute,
   getBusInfo,
   getBusTotalInfo,
+  getTempleListNavitimeTemple,
 }
 
 extension APIPathExtension on APIPath {
@@ -37,6 +38,8 @@ extension APIPathExtension on APIPath {
         return 'getBusInfo';
       case APIPath.getBusTotalInfo:
         return 'getBusTotalInfo';
+      case APIPath.getTempleListNavitimeTemple:
+        return 'getTempleListNavitimeTemple';
     }
   }
 }

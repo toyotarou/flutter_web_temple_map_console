@@ -21,6 +21,7 @@ class HomeScreen extends ConsumerStatefulWidget {
     required this.tokyoMunicipalMap,
     required this.templeListMap,
     required this.templeListList,
+    required this.templeListNavitimeMap,
   });
 
   final List<TempleModel> templeList;
@@ -31,6 +32,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   final Map<String, MunicipalModel> tokyoMunicipalMap;
   final Map<String, TempleListModel> templeListMap;
   final List<TempleListModel> templeListList;
+  final Map<String, TempleListModel> templeListNavitimeMap;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -51,6 +53,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
       getDataNotifier.setKeepTokyoMunicipalMap(map: widget.tokyoMunicipalMap);
       getDataNotifier.setKeepTempleListMap(map: widget.templeListMap);
       getDataNotifier.setKeepTempleListList(list: widget.templeListList);
+      getDataNotifier.setKeepTempleListNavitimeMap(map: widget.templeListNavitimeMap);
+
+      /////////////////////////////////
+
+      final existingTempleNames = widget.templeLatLngList.map((e) => e.temple).toSet();
+
+      final filteredNotVisitTempleList = widget.templeListList
+          .where((temple) => !existingTempleNames.contains(temple.name))
+          .toList();
+
+      getDataNotifier.setKeepFilteredNotVisitTempleList(list: filteredNotVisitTempleList);
+
+      /////////////////////////////////
 
       for (final MunicipalModel element in widget.tokyoMunicipalList) {
         allPolygons?.addAll(element.polygons);

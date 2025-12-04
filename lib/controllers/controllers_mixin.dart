@@ -5,6 +5,7 @@ import '_get_data/temple/temple.dart';
 import '_get_data/temple_lat_lng/temple_lat_lng.dart';
 
 import '_get_data/temple_list/temple_list.dart';
+import '_get_data/temple_list_navitime/temple_list_navitime.dart';
 import '_get_data/tokyo_municipal/tokyo_municipal.dart';
 import 'app_param/app_param.dart';
 
@@ -50,6 +51,12 @@ mixin ControllersMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   TempleListState get templeListState => ref.watch(templeListProvider);
 
   TempleList get templeListNotifier => ref.read(templeListProvider.notifier);
+
+  //==========================================//
+
+  TempleListNavitimeState get templeListNavitimeState => ref.watch(templeListNavitimeProvider);
+
+  TempleListNavitime get templeListNavitimeNotifier => ref.read(templeListNavitimeProvider.notifier);
 
   //==========================================//
 }
