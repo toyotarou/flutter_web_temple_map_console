@@ -30,6 +30,9 @@ mixin _$AppParamState {
   SpotDataModel? get selectedSpotDataModel =>
       throw _privateConstructorUsedError;
 
+  ///
+  List<String> get displayTempleRankList => throw _privateConstructorUsedError;
+
   /// Create a copy of AppParamState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +51,8 @@ abstract class $AppParamStateCopyWith<$Res> {
       int currentPaddingIndex,
       String selectedDate,
       bool isMapCenterMove,
-      SpotDataModel? selectedSpotDataModel});
+      SpotDataModel? selectedSpotDataModel,
+      List<String> displayTempleRankList});
 }
 
 /// @nodoc
@@ -71,6 +75,7 @@ class _$AppParamStateCopyWithImpl<$Res, $Val extends AppParamState>
     Object? selectedDate = null,
     Object? isMapCenterMove = null,
     Object? selectedSpotDataModel = freezed,
+    Object? displayTempleRankList = null,
   }) {
     return _then(_value.copyWith(
       currentZoom: null == currentZoom
@@ -93,6 +98,10 @@ class _$AppParamStateCopyWithImpl<$Res, $Val extends AppParamState>
           ? _value.selectedSpotDataModel
           : selectedSpotDataModel // ignore: cast_nullable_to_non_nullable
               as SpotDataModel?,
+      displayTempleRankList: null == displayTempleRankList
+          ? _value.displayTempleRankList
+          : displayTempleRankList // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ) as $Val);
   }
 }
@@ -110,7 +119,8 @@ abstract class _$$AppParamStateImplCopyWith<$Res>
       int currentPaddingIndex,
       String selectedDate,
       bool isMapCenterMove,
-      SpotDataModel? selectedSpotDataModel});
+      SpotDataModel? selectedSpotDataModel,
+      List<String> displayTempleRankList});
 }
 
 /// @nodoc
@@ -131,6 +141,7 @@ class __$$AppParamStateImplCopyWithImpl<$Res>
     Object? selectedDate = null,
     Object? isMapCenterMove = null,
     Object? selectedSpotDataModel = freezed,
+    Object? displayTempleRankList = null,
   }) {
     return _then(_$AppParamStateImpl(
       currentZoom: null == currentZoom
@@ -153,6 +164,10 @@ class __$$AppParamStateImplCopyWithImpl<$Res>
           ? _value.selectedSpotDataModel
           : selectedSpotDataModel // ignore: cast_nullable_to_non_nullable
               as SpotDataModel?,
+      displayTempleRankList: null == displayTempleRankList
+          ? _value._displayTempleRankList
+          : displayTempleRankList // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -165,7 +180,9 @@ class _$AppParamStateImpl implements _AppParamState {
       this.currentPaddingIndex = 5,
       this.selectedDate = '',
       this.isMapCenterMove = false,
-      this.selectedSpotDataModel});
+      this.selectedSpotDataModel,
+      final List<String> displayTempleRankList = const <String>[]})
+      : _displayTempleRankList = displayTempleRankList;
 
   ///
   @override
@@ -189,9 +206,22 @@ class _$AppParamStateImpl implements _AppParamState {
   @override
   final SpotDataModel? selectedSpotDataModel;
 
+  ///
+  final List<String> _displayTempleRankList;
+
+  ///
+  @override
+  @JsonKey()
+  List<String> get displayTempleRankList {
+    if (_displayTempleRankList is EqualUnmodifiableListView)
+      return _displayTempleRankList;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_displayTempleRankList);
+  }
+
   @override
   String toString() {
-    return 'AppParamState(currentZoom: $currentZoom, currentPaddingIndex: $currentPaddingIndex, selectedDate: $selectedDate, isMapCenterMove: $isMapCenterMove, selectedSpotDataModel: $selectedSpotDataModel)';
+    return 'AppParamState(currentZoom: $currentZoom, currentPaddingIndex: $currentPaddingIndex, selectedDate: $selectedDate, isMapCenterMove: $isMapCenterMove, selectedSpotDataModel: $selectedSpotDataModel, displayTempleRankList: $displayTempleRankList)';
   }
 
   @override
@@ -208,12 +238,20 @@ class _$AppParamStateImpl implements _AppParamState {
             (identical(other.isMapCenterMove, isMapCenterMove) ||
                 other.isMapCenterMove == isMapCenterMove) &&
             (identical(other.selectedSpotDataModel, selectedSpotDataModel) ||
-                other.selectedSpotDataModel == selectedSpotDataModel));
+                other.selectedSpotDataModel == selectedSpotDataModel) &&
+            const DeepCollectionEquality()
+                .equals(other._displayTempleRankList, _displayTempleRankList));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, currentZoom, currentPaddingIndex,
-      selectedDate, isMapCenterMove, selectedSpotDataModel);
+  int get hashCode => Object.hash(
+      runtimeType,
+      currentZoom,
+      currentPaddingIndex,
+      selectedDate,
+      isMapCenterMove,
+      selectedSpotDataModel,
+      const DeepCollectionEquality().hash(_displayTempleRankList));
 
   /// Create a copy of AppParamState
   /// with the given fields replaced by the non-null parameter values.
@@ -230,7 +268,8 @@ abstract class _AppParamState implements AppParamState {
       final int currentPaddingIndex,
       final String selectedDate,
       final bool isMapCenterMove,
-      final SpotDataModel? selectedSpotDataModel}) = _$AppParamStateImpl;
+      final SpotDataModel? selectedSpotDataModel,
+      final List<String> displayTempleRankList}) = _$AppParamStateImpl;
 
   ///
   @override
@@ -249,6 +288,10 @@ abstract class _AppParamState implements AppParamState {
   ///
   @override
   SpotDataModel? get selectedSpotDataModel;
+
+  ///
+  @override
+  List<String> get displayTempleRankList;
 
   /// Create a copy of AppParamState
   /// with the given fields replaced by the non-null parameter values.

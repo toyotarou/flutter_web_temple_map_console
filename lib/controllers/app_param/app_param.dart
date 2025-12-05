@@ -22,6 +22,9 @@ class AppParamState with _$AppParamState {
 
     ///
     SpotDataModel? selectedSpotDataModel,
+
+    ///
+    @Default(<String>[]) List<String> displayTempleRankList,
   }) = _AppParamState;
 }
 
@@ -42,4 +45,28 @@ class AppParam extends _$AppParam {
 
   ///
   void setSelectedSpotDataModel({SpotDataModel? value}) => state = state.copyWith(selectedSpotDataModel: value);
+
+
+
+
+
+  ///
+  void setDefaultDisplayTempleRankList()=> state = state.copyWith(displayTempleRankList: <String>['S','A','B','C']);
+
+
+
+
+
+  ///
+  void setDisplayTempleRankList({required String rank}) {
+    final List<String> list = <String>[...state.displayTempleRankList];
+
+    if (list.contains(rank)) {
+      list.remove(rank);
+    } else {
+      list.add(rank);
+    }
+
+    state = state.copyWith(displayTempleRankList: list);
+  }
 }

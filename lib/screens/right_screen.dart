@@ -132,6 +132,33 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   ),
                 ),
               ),
+
+              if (appParamState.selectedDate != '') ...<Widget>[
+                Positioned(
+                  bottom: 20,
+                  right: 20,
+                  child: Row(
+                    children: <String>['S', 'A', 'B', 'C'].map((String e) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: GestureDetector(
+                          onTap: () {
+                            appParamNotifier.setDisplayTempleRankList(rank: e);
+
+                            makeTempleMarkerList();
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: (appParamState.displayTempleRankList.contains(e))
+                                ? Colors.orangeAccent.withValues(alpha: 0.6)
+                                : Colors.redAccent.withValues(alpha: 0.6),
+                            child: Text(e, style: const TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
             ],
           ),
         ],
@@ -174,43 +201,51 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     getDataState.keepTempleLatLngMap.forEach((String key, TempleLatLngModel value) {
       templeNames.add(value.temple);
 
-      templeMarkerList.add(
-        Marker(
-          width: 40,
-          height: 40,
-          point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
-          child: GestureDetector(
-            onTap: () {
-              appParamNotifier.setSelectedSpotDataModel(
-                value: SpotDataModel(
-                  type: '',
-                  name: value.temple,
-                  address: value.address,
-                  latitude: value.lat,
-                  longitude: value.lng,
-                ),
-              );
-              makeTempleMarkerList();
-            },
-            child:
-                (appParamState.selectedSpotDataModel?.latitude == value.lat &&
-                    appParamState.selectedSpotDataModel?.longitude == value.lng)
-                ? Container(
-                    decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
-                    padding: const EdgeInsets.all(3),
+      bool flag = false;
 
-                    child: CircleAvatar(
+      if (appParamState.displayTempleRankList.contains(value.rank)) {
+        flag = true;
+      }
+
+      if (flag) {
+        templeMarkerList.add(
+          Marker(
+            width: 40,
+            height: 40,
+            point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
+            child: GestureDetector(
+              onTap: () {
+                appParamNotifier.setSelectedSpotDataModel(
+                  value: SpotDataModel(
+                    type: '',
+                    name: value.temple,
+                    address: value.address,
+                    latitude: value.lat,
+                    longitude: value.lng,
+                  ),
+                );
+                makeTempleMarkerList();
+              },
+              child:
+                  (appParamState.selectedSpotDataModel?.latitude == value.lat &&
+                      appParamState.selectedSpotDataModel?.longitude == value.lng)
+                  ? Container(
+                      decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
+                      padding: const EdgeInsets.all(3),
+
+                      child: CircleAvatar(
+                        backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
+                        child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                    )
+                  : CircleAvatar(
                       backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
                       child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
                     ),
-                  )
-                : CircleAvatar(
-                    backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
-                    child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
-                  ),
+            ),
           ),
-        ),
-      );
+        );
+      }
     });
 
     for (final TempleListModel element in getDataState.keepFilteredNotVisitTempleList) {

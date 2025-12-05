@@ -35,6 +35,8 @@ class _LeftScreenState extends ConsumerState<LeftScreen> with ControllersMixin<L
               appParamNotifier.setSelectedDate(date: element.date.yyyymmdd);
 
               appParamNotifier.setSelectedSpotDataModel();
+
+              appParamNotifier.setDefaultDisplayTempleRankList();
             },
 
             child: Container(
