@@ -231,7 +231,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
     getDataState.keepTempleListNavitimeMap.forEach((String key, TempleListModel value) {
       if (templeNames.contains(value.name)) {
-        print(value.name);
+//        print(value.name);
       } else {
         if (double.tryParse(value.lat) != null && double.tryParse(value.lng) != null) {
           templeMarkerList.add(
