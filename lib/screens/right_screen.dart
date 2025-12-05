@@ -169,7 +169,11 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   void makeTempleMarkerList() {
     templeMarkerList.clear();
 
+    List<String> templeNames = [];
+
     getDataState.keepTempleLatLngMap.forEach((String key, TempleLatLngModel value) {
+      templeNames.add(value.temple);
+
       templeMarkerList.add(
         Marker(
           width: 40,
@@ -197,6 +201,8 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     });
 
     for (final TempleListModel element in getDataState.keepFilteredNotVisitTempleList) {
+      templeNames.add(element.name);
+
       templeMarkerList.add(
         Marker(
           width: 40,
@@ -224,30 +230,36 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     }
 
     getDataState.keepTempleListNavitimeMap.forEach((String key, TempleListModel value) {
-      templeMarkerList.add(
-        Marker(
-          width: 40,
-          height: 40,
-          point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
-          child: GestureDetector(
-            onTap: () {
-              appParamNotifier.setSelectedSpotDataModel(
-                value: SpotDataModel(
-                  type: '',
-                  name: value.name,
-                  address: value.address,
-                  latitude: value.lat,
-                  longitude: value.lng,
+      if (templeNames.contains(value.name)) {
+        print(value.name);
+      } else {
+        if (double.tryParse(value.lat) != null && double.tryParse(value.lng) != null) {
+          templeMarkerList.add(
+            Marker(
+              width: 40,
+              height: 40,
+              point: LatLng(value.lat.toDouble(), value.lng.toDouble()),
+              child: GestureDetector(
+                onTap: () {
+                  appParamNotifier.setSelectedSpotDataModel(
+                    value: SpotDataModel(
+                      type: '',
+                      name: value.name,
+                      address: value.address,
+                      latitude: value.lat,
+                      longitude: value.lng,
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
+                  child: const SizedBox.shrink(),
                 ),
-              );
-            },
-            child: CircleAvatar(
-              backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
-              child: const SizedBox.shrink(),
+              ),
             ),
-          ),
-        ),
-      );
+          );
+        }
+      }
     });
   }
 
