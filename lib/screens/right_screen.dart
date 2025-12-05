@@ -169,7 +169,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   void makeTempleMarkerList() {
     templeMarkerList.clear();
 
-    List<String> templeNames = [];
+    final List<String> templeNames = <String>[];
 
     getDataState.keepTempleLatLngMap.forEach((String key, TempleLatLngModel value) {
       templeNames.add(value.temple);
@@ -190,11 +190,24 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   longitude: value.lng,
                 ),
               );
+              makeTempleMarkerList();
             },
-            child: CircleAvatar(
-              backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
-              child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
-            ),
+            child:
+                (appParamState.selectedSpotDataModel?.latitude == value.lat &&
+                    appParamState.selectedSpotDataModel?.longitude == value.lng)
+                ? Container(
+                    decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
+                    padding: const EdgeInsets.all(3),
+
+                    child: CircleAvatar(
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
+                      child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
+                    ),
+                  )
+                : CircleAvatar(
+                    backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
+                    child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
+                  ),
           ),
         ),
       );
@@ -219,11 +232,24 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   longitude: element.lng,
                 ),
               );
+              makeTempleMarkerList();
             },
-            child: CircleAvatar(
-              backgroundColor: Colors.purpleAccent.withValues(alpha: 0.6),
-              child: const SizedBox.shrink(),
-            ),
+            child:
+                (appParamState.selectedSpotDataModel?.latitude == element.lat &&
+                    appParamState.selectedSpotDataModel?.longitude == element.lng)
+                ? Container(
+                    decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
+                    padding: const EdgeInsets.all(3),
+
+                    child: CircleAvatar(
+                      backgroundColor: Colors.purpleAccent.withValues(alpha: 0.6),
+                      child: const SizedBox.shrink(),
+                    ),
+                  )
+                : CircleAvatar(
+                    backgroundColor: Colors.purpleAccent.withValues(alpha: 0.6),
+                    child: const SizedBox.shrink(),
+                  ),
           ),
         ),
       );
@@ -231,7 +257,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
     getDataState.keepTempleListNavitimeMap.forEach((String key, TempleListModel value) {
       if (templeNames.contains(value.name)) {
-//        print(value.name);
+        //        print(value.name);
       } else {
         if (double.tryParse(value.lat) != null && double.tryParse(value.lng) != null) {
           templeMarkerList.add(
@@ -250,11 +276,24 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                       longitude: value.lng,
                     ),
                   );
+                  makeTempleMarkerList();
                 },
-                child: CircleAvatar(
-                  backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
-                  child: const SizedBox.shrink(),
-                ),
+                child:
+                    (appParamState.selectedSpotDataModel?.latitude == value.lat &&
+                        appParamState.selectedSpotDataModel?.longitude == value.lng)
+                    ? Container(
+                        decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
+                        padding: const EdgeInsets.all(3),
+
+                        child: CircleAvatar(
+                          backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
+                          child: const SizedBox.shrink(),
+                        ),
+                      )
+                    : CircleAvatar(
+                        backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
+                        child: const SizedBox.shrink(),
+                      ),
               ),
             ),
           );
