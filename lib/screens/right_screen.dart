@@ -1,7 +1,10 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+
 import '../controllers/controllers_mixin.dart';
 import '../extensions/extensions.dart';
 import '../models/common/spot_data_model.dart';
@@ -11,6 +14,8 @@ import '../models/temple_model.dart';
 import '../utility/daily_spot_data_functions.dart';
 import '../utility/map_functions.dart';
 import '../utility/utility.dart';
+
+///////////////////////////////////////////////////////////////////////
 
 class RightScreen extends ConsumerStatefulWidget {
   const RightScreen({super.key, this.allPolygons});
@@ -25,157 +30,277 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   final MapController mapController = MapController();
 
   double? currentZoom;
-
   double currentZoomEightTeen = 15;
 
   List<SpotDataModel> selectedSpotDataModelList = <SpotDataModel>[];
-
   List<Marker> templeMarkerList = <Marker>[];
-
   List<Marker> selectedSpotDataModelMarkerList = <Marker>[];
 
   Utility utility = Utility();
 
-  bool isNarrow = false;
+  static const double _cellWidth = 120;
+  static const double _collapsedHeight = 70;
+  static const double _expandedHeight = 260;
+  static const double _buttonHeight = 40;
 
   ///
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!appParamState.isMapCenterMove) {
-        moveMapCenterPosition(isNarrow: isNarrow);
-      }
-    });
-
     return LayoutBuilder(
       builder: (BuildContext contest, BoxConstraints constraints) {
-        if (constraints.maxWidth < 600) {
-          isNarrow = true;
-        } else {
-          isNarrow = false;
-        }
+        final Size _ = MediaQuery.of(context).size;
+
+        final List<TempleModel> templeList = getDataState.keepTempleList;
+        final List<_TimelineItem> timelineItems = _buildTimelineItems(templeList);
+
+        final bool isNarrow = constraints.maxWidth < 900;
+
+        debugPrint(
+          'RightScreen Layout: maxW=${constraints.maxWidth}, '
+          'isNarrow=$isNarrow, '
+          'templeList.len=${templeList.length}, '
+          'timelineItems.len=${timelineItems.length}',
+        );
+
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!appParamState.isMapCenterMove) {
+            moveMapCenterPosition(isNarrow: isNarrow);
+          }
+        });
 
         return SafeArea(
-          child: Column(
+          child: Stack(
             children: <Widget>[
-              Stack(
-                children: <Widget>[
-                  SizedBox(
-                    height: context.screenSize.height,
-                    child: FlutterMap(
-                      mapController: mapController,
-                      options: MapOptions(
-                        initialCenter: const LatLng(35.718532, 139.586639),
-                        initialZoom: currentZoomEightTeen,
-                        onPositionChanged: (MapCamera position, bool isMoving) {
-                          if (isMoving) {
-                            appParamNotifier.setCurrentZoom(zoom: position.zoom);
-                          }
+              Positioned.fill(
+                child: FlutterMap(
+                  mapController: mapController,
+                  options: MapOptions(
+                    initialCenter: const LatLng(35.718532, 139.586639),
+                    initialZoom: currentZoomEightTeen,
+                    onPositionChanged: (MapCamera position, bool isMoving) {
+                      if (isMoving) {
+                        appParamNotifier.setCurrentZoom(zoom: position.zoom);
+                      }
+                    },
+                  ),
+                  children: <Widget>[
+                    TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+                    // ignore: always_specify_types
+                    if (widget.allPolygons != null) ...<Widget>[PolygonLayer(polygons: makeAreaPolygons())],
+                    // ignore: always_specify_types
+                    PolylineLayer(polylines: makeDateRoutePolyline()),
+                    if (selectedSpotDataModelMarkerList.isNotEmpty)
+                      MarkerLayer(markers: selectedSpotDataModelMarkerList),
+                    if (templeMarkerList.isNotEmpty) MarkerLayer(markers: templeMarkerList),
+                  ],
+                ),
+              ),
+
+              Positioned(
+                top: 10,
+                right: 10,
+                left: 10,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  width: double.infinity,
+                  constraints: BoxConstraints(maxHeight: isNarrow ? 150 : 180),
+                  padding: const EdgeInsets.all(10),
+                  child: DefaultTextStyle(
+                    style: TextStyle(fontSize: isNarrow ? 12 : 20, color: Colors.white),
+                    child: _buildTopInfoBox(isNarrow),
+                  ),
+                ),
+              ),
+
+              if (appParamState.selectedDate != '') ...<Widget>[
+                Positioned(
+                  top: 150,
+                  right: 20,
+                  child: Row(
+                    children: <String>['S', 'A', 'B', 'C'].map((String e) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: GestureDetector(
+                          onTap: () {
+                            appParamNotifier.setDisplayTempleRankList(rank: e);
+                            makeTempleMarkerList(isNarrow: isNarrow);
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: (appParamState.displayTempleRankList.contains(e))
+                                ? Colors.orangeAccent.withValues(alpha: 0.6)
+                                : Colors.redAccent.withValues(alpha: 0.6),
+                            child: Text(e, style: const TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+
+              if (isNarrow && timelineItems.isNotEmpty) ...<Widget>[
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  left: 0,
+                  child: SizedBox(
+                    height: _expandedHeight,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(
+                        dragDevices: <PointerDeviceKind>{
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.mouse,
+                          PointerDeviceKind.trackpad,
                         },
                       ),
-                      children: <Widget>[
-                        TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        itemCount: timelineItems.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        itemBuilder: (BuildContext context, int index) {
+                          final _TimelineItem item = timelineItems[index];
 
-                        if (widget.allPolygons != null) ...<Widget>[
-                          // ignore: always_specify_types
-                          PolygonLayer(polygons: makeAreaPolygons()),
-                        ],
-
-                        // ignore: always_specify_types
-                        PolylineLayer(polylines: makeDateRoutePolyline()),
-
-                        if (selectedSpotDataModelMarkerList.isNotEmpty) ...<Widget>[
-                          MarkerLayer(markers: selectedSpotDataModelMarkerList),
-                        ],
-
-                        if (templeMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: templeMarkerList)],
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    left: 10,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      width: double.infinity,
-                      height: 130,
-                      padding: const EdgeInsets.all(10),
-                      child: DefaultTextStyle(
-                        style: TextStyle(fontSize: isNarrow ? 12 : 20, color: Colors.white),
-                        child: (appParamState.selectedSpotDataModel != null)
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[SelectableText(appParamState.selectedSpotDataModel!.name)],
-                              )
-                            : (selectedSpotDataModelList.isNotEmpty)
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(appParamState.selectedDate),
-                                  DefaultTextStyle(
-                                    style: TextStyle(fontSize: isNarrow ? 10 : 12, color: Colors.greenAccent),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Text(selectedSpotDataModelList[0].name),
-                                        const SizedBox(width: 20),
-                                        Text(selectedSpotDataModelList[selectedSpotDataModelList.length - 1].name),
-                                      ],
-                                    ),
+                          if (item is _YearHeaderItem) {
+                            return SizedBox(
+                              width: _cellWidth * 0.8,
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: _collapsedHeight,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(border: Border.all(width: 2), color: Colors.grey.shade300),
+                                  child: Text(
+                                    '${item.year} 年',
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      itemBuilder: (BuildContext context, int index) {
-                                        return (selectedSpotDataModelList[index].type == 'temple')
-                                            ? Text(selectedSpotDataModelList[index].name)
-                                            : const SizedBox.shrink();
-                                      },
-                                      itemCount: selectedSpotDataModelList.length,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                    ),
-                  ),
+                                ),
+                              ),
+                            );
+                          }
 
-                  if (appParamState.selectedDate != '') ...<Widget>[
-                    Positioned(
-                      top: 150,
-                      right: 20,
-                      child: Row(
-                        children: <String>['S', 'A', 'B', 'C'].map((String e) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: GestureDetector(
-                              onTap: () {
-                                appParamNotifier.setDisplayTempleRankList(rank: e);
+                          final TempleModel temple = (item as _TempleItem).temple;
 
-                                makeTempleMarkerList(isNarrow: isNarrow);
-                              },
-                              child: CircleAvatar(
-                                backgroundColor: (appParamState.displayTempleRankList.contains(e))
-                                    ? Colors.orangeAccent.withValues(alpha: 0.6)
-                                    : Colors.redAccent.withValues(alpha: 0.6),
-                                child: Text(e, style: const TextStyle(color: Colors.white)),
+                          return SizedBox(
+                            width: _cellWidth,
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: _TempleCell(
+                                temple: temple,
+                                width: _cellWidth,
+                                collapsedHeight: _collapsedHeight,
+                                expandedHeight: _expandedHeight,
+                                buttonHeight: _buttonHeight,
                               ),
                             ),
                           );
-                        }).toList(),
+                        },
                       ),
                     ),
-                  ],
-                ],
-              ),
+                  ),
+                ),
+              ],
+              if (isNarrow && timelineItems.isEmpty) ...<Widget>[
+                Positioned(
+                  bottom: 40,
+                  left: 10,
+                  right: 10,
+                  child: Container(
+                    color: Colors.red.withValues(alpha: 0.7),
+                    padding: const EdgeInsets.all(4),
+                    child: const Text(
+                      'templeList が空なので、タイムラインを表示するデータがありません',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         );
       },
     );
+  }
+
+  ///
+  Widget _buildTopInfoBox(bool isNarrow) {
+    if (appParamState.selectedSpotDataModel != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[SelectableText(appParamState.selectedSpotDataModel!.name)],
+      );
+    }
+
+    if (selectedSpotDataModelList.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(appParamState.selectedDate),
+          Flexible(
+            child: DefaultTextStyle(
+              style: TextStyle(fontSize: isNarrow ? 10 : 12, color: Colors.greenAccent),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(selectedSpotDataModelList[0].name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Text(
+                      selectedSpotDataModelList[selectedSpotDataModelList.length - 1].name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return (selectedSpotDataModelList[index].type == 'temple')
+                    ? Text(
+                        selectedSpotDataModelList[index].name,
+                        style: const TextStyle(fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : const SizedBox.shrink();
+              },
+              itemCount: selectedSpotDataModelList.length,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  ///
+  List<_TimelineItem> _buildTimelineItems(List<TempleModel> temples) {
+    final List<_TimelineItem> list = <_TimelineItem>[];
+    if (temples.isEmpty) {
+      return list;
+    }
+
+    final List<TempleModel> sorted = <TempleModel>[...temples]
+      ..sort((TempleModel a, TempleModel b) => a.date.compareTo(b.date));
+
+    int? currentYear;
+    for (final TempleModel t in sorted) {
+      if (currentYear != t.date.year) {
+        currentYear = t.date.year;
+        list.add(_YearHeaderItem(currentYear));
+      }
+      list.add(_TempleItem(t));
+    }
+    return list;
   }
 
   ///
@@ -244,7 +369,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   ? Container(
                       decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
                       padding: const EdgeInsets.all(3),
-
                       child: CircleAvatar(
                         backgroundColor: Colors.redAccent.withValues(alpha: 0.6),
                         child: Text(value.rank, style: const TextStyle(color: Colors.white, fontSize: 20)),
@@ -287,7 +411,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                 ? Container(
                     decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
                     padding: const EdgeInsets.all(3),
-
                     child: CircleAvatar(
                       backgroundColor: Colors.purpleAccent.withValues(alpha: 0.6),
                       child: const SizedBox.shrink(),
@@ -304,7 +427,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
     getDataState.keepTempleListNavitimeMap.forEach((String key, TempleListModel value) {
       if (templeNames.contains(value.name)) {
-        //        print(value.name);
       } else {
         if (double.tryParse(value.lat) != null && double.tryParse(value.lng) != null) {
           templeMarkerList.add(
@@ -323,7 +445,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                       longitude: value.lng,
                     ),
                   );
-
                   makeTempleMarkerList(isNarrow: isNarrow);
                 },
                 child:
@@ -332,7 +453,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                     ? Container(
                         decoration: BoxDecoration(border: Border.all(width: 2), shape: BoxShape.circle),
                         padding: const EdgeInsets.all(3),
-
                         child: CircleAvatar(
                           backgroundColor: Colors.blueAccent.withValues(alpha: 0.6),
                           child: const SizedBox.shrink(),
@@ -373,12 +493,11 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
           ),
         ),
       );
-
       i++;
     }
   }
 
-  ///
+  ////
   Widget displayStartEndStationMark({required int index}) {
     if (index == 0) {
       return CircleAvatar(
@@ -402,7 +521,8 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   ///
   // ignore: always_specify_types
   List<Polyline> makeDateRoutePolyline() {
-    return <Polyline<Object>>[
+    // ignore: always_specify_types
+    return <Polyline>[
       for (int i = 0; i < selectedSpotDataModelList.length; i++)
         // ignore: always_specify_types
         Polyline(
@@ -419,7 +539,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   // ignore: always_specify_types
   List<Polygon> makeAreaPolygons() {
     // ignore: always_specify_types
-    final List<Polygon<Object>> polygonList = <Polygon<Object>>[];
+    final List<Polygon> polygonList = <Polygon>[];
 
     final List<List<List<List<double>>>>? all = widget.allPolygons;
 
@@ -438,7 +558,8 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
     int idx = 0;
     for (final List<List<List<double>>> poly in uniquePolygons.values) {
-      final Polygon<Object>? polygon = getColorPaintPolygon(
+      // ignore: always_specify_types
+      final Polygon? polygon = getColorPaintPolygon(
         polygon: poly,
         color: twentyFourColor[idx % 24].withValues(alpha: 0.3),
       );
@@ -450,5 +571,128 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     }
 
     return polygonList;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////
+
+abstract class _TimelineItem {}
+
+class _TempleItem extends _TimelineItem {
+  _TempleItem(this.temple);
+
+  final TempleModel temple;
+}
+
+class _YearHeaderItem extends _TimelineItem {
+  _YearHeaderItem(this.year);
+
+  final int year;
+}
+
+///////////////////////////////////////////////////////////////////////
+
+class _TempleCell extends StatefulWidget {
+  const _TempleCell({
+    required this.temple,
+    required this.width,
+    required this.collapsedHeight,
+    required this.expandedHeight,
+    required this.buttonHeight,
+  });
+
+  final TempleModel temple;
+  final double width;
+  final double collapsedHeight;
+  final double expandedHeight;
+  final double buttonHeight;
+
+  @override
+  State<_TempleCell> createState() => _TempleCellState();
+}
+
+///////////////////////////////////////////////////////////////////////
+
+class _TempleCellState extends State<_TempleCell> {
+  bool _isExpanded = false;
+
+  String get _dateString =>
+      '${widget.temple.date.year.toString().padLeft(4, '0')}/'
+      '${widget.temple.date.month.toString().padLeft(2, '0')}/'
+      '${widget.temple.date.day.toString().padLeft(2, '0')}';
+
+  ///
+  @override
+  Widget build(BuildContext context) {
+    final double height = _isExpanded ? widget.expandedHeight : widget.collapsedHeight;
+
+    return GestureDetector(
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        width: widget.width,
+        height: height,
+        decoration: BoxDecoration(border: Border.all(width: 2), color: Colors.green.shade100),
+
+        child: _isExpanded ? _buildExpanded() : _buildCollapsed(),
+      ),
+    );
+  }
+
+  ///
+  Widget _buildExpanded() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(_dateString, style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(widget.temple.temple, style: const TextStyle(fontSize: 14)),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          height: widget.buttonHeight,
+          child: Container(
+            color: Colors.green.shade700,
+            alignment: Alignment.center,
+            child: const Text('詳細を見る', style: TextStyle(color: Colors.white, fontSize: 12)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  ///
+  Widget _buildCollapsed() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: FittedBox(
+        alignment: Alignment.centerLeft,
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(_dateString, style: const TextStyle(fontSize: 12)),
+            const SizedBox(height: 4),
+            Text(
+              widget.temple.temple,
+              style: const TextStyle(fontSize: 14),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
