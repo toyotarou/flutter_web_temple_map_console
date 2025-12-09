@@ -145,7 +145,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
                   if (appParamState.selectedDate != '') ...<Widget>[
                     Positioned(
-                      bottom: 20,
+                      top: 150,
                       right: 20,
                       child: Row(
                         children: <String>['S', 'A', 'B', 'C'].map((String e) {
