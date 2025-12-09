@@ -8,6 +8,7 @@ import '../../models/temple_lat_lng_model.dart';
 import '../../models/temple_list_model.dart';
 import '../../models/temple_model.dart';
 
+import '../../models/tokyo_train_model.dart';
 import '../../utility/utility.dart';
 
 part 'get_data.freezed.dart';
@@ -32,6 +33,11 @@ class GetDataState with _$GetDataState {
     @Default(<TempleListModel>[]) List<TempleListModel> keepFilteredNotVisitTempleList,
 
     @Default(<String, TempleListModel>{}) Map<String, TempleListModel> keepTempleListNavitimeMap,
+
+    @Default(<TokyoTrainModel>[]) List<TokyoTrainModel> keepTokyoTrainList,
+    @Default(<String, TokyoTrainModel>{}) Map<String, TokyoTrainModel> keepTokyoTrainMap,
+    @Default(<String, List<TokyoTrainModel>>{})
+    Map<String, List<TokyoTrainModel>> keepTokyoStationTokyoTrainModelListMap,
   }) = _GetDataState;
 }
 
@@ -79,4 +85,15 @@ class GetData extends _$GetData {
   ///
   void setKeepTempleListNavitimeMap({required Map<String, TempleListModel> map}) =>
       state = state.copyWith(keepTempleListNavitimeMap: map);
+
+  ///
+  void setKeepTokyoTrainList({required List<TokyoTrainModel> list}) => state = state.copyWith(keepTokyoTrainList: list);
+
+  ///
+  void setKeepTokyoTrainMap({required Map<String, TokyoTrainModel> map}) =>
+      state = state.copyWith(keepTokyoTrainMap: map);
+
+  ///
+  void setKeepTokyoStationTokyoTrainModelListMap({required Map<String, List<TokyoTrainModel>> map}) =>
+      state = state.copyWith(keepTokyoStationTokyoTrainModelListMap: map);
 }

@@ -7,6 +7,7 @@ import '_get_data/temple_lat_lng/temple_lat_lng.dart';
 import '_get_data/temple_list/temple_list.dart';
 import '_get_data/temple_list_navitime/temple_list_navitime.dart';
 import '_get_data/tokyo_municipal/tokyo_municipal.dart';
+import '_get_data/tokyo_train/tokyo_train.dart';
 import 'app_param/app_param.dart';
 
 mixin ControllersMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
@@ -57,6 +58,12 @@ mixin ControllersMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   TempleListNavitimeState get templeListNavitimeState => ref.watch(templeListNavitimeProvider);
 
   TempleListNavitime get templeListNavitimeNotifier => ref.read(templeListNavitimeProvider.notifier);
+
+  //==========================================//
+
+  TokyoTrainState get tokyoTrainState => ref.watch(tokyoTrainProvider);
+
+  TokyoTrain get tokyoTrainNotifier => ref.read(tokyoTrainProvider.notifier);
 
   //==========================================//
 }

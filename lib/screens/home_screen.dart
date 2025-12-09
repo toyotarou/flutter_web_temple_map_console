@@ -7,6 +7,7 @@ import '../models/station_model.dart';
 import '../models/temple_lat_lng_model.dart';
 import '../models/temple_list_model.dart';
 import '../models/temple_model.dart';
+import '../models/tokyo_train_model.dart';
 import 'left_screen.dart';
 import 'right_screen.dart';
 
@@ -22,6 +23,9 @@ class HomeScreen extends ConsumerStatefulWidget {
     required this.templeListMap,
     required this.templeListList,
     required this.templeListNavitimeMap,
+    required this.tokyoTrainList,
+    required this.tokyoTrainMap,
+    required this.tokyoStationTokyoTrainModelListMap,
   });
 
   final List<TempleModel> templeList;
@@ -33,6 +37,9 @@ class HomeScreen extends ConsumerStatefulWidget {
   final Map<String, TempleListModel> templeListMap;
   final List<TempleListModel> templeListList;
   final Map<String, TempleListModel> templeListNavitimeMap;
+  final List<TokyoTrainModel> tokyoTrainList;
+  final Map<String, TokyoTrainModel> tokyoTrainMap;
+  final Map<String, List<TokyoTrainModel>> tokyoStationTokyoTrainModelListMap;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -54,6 +61,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
       getDataNotifier.setKeepTempleListMap(map: widget.templeListMap);
       getDataNotifier.setKeepTempleListList(list: widget.templeListList);
       getDataNotifier.setKeepTempleListNavitimeMap(map: widget.templeListNavitimeMap);
+      getDataNotifier.setKeepTokyoTrainList(list: widget.tokyoTrainList);
+      getDataNotifier.setKeepTokyoTrainMap(map: widget.tokyoTrainMap);
+      getDataNotifier.setKeepTokyoStationTokyoTrainModelListMap(map: widget.tokyoStationTokyoTrainModelListMap);
 
       /////////////////////////////////
 
@@ -72,23 +82,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with ControllersMixin<H
       }
     });
 
-    return Scaffold(
-      body: SafeArea(
-        child: Row(
-          children: <Widget>[
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(right: BorderSide(color: Colors.white, width: 5)),
-              ),
+    return LayoutBuilder(
+      builder: (BuildContext contest, BoxConstraints constraints) {
+        return Scaffold(
+          body: SafeArea(
+            child: Row(
+              children: <Widget>[
+                if (constraints.maxWidth >= 600) ...<Widget>[
+                  Container(
+                    decoration: const BoxDecoration(
+                      border: Border(right: BorderSide(color: Colors.white, width: 5)),
+                    ),
 
-              width: context.screenSize.width * 0.2,
-              child: const LeftScreen(),
+                    width: context.screenSize.width * 0.2,
+                    child: const LeftScreen(),
+                  ),
+                ],
+
+                Expanded(child: RightScreen(allPolygons: allPolygons)),
+              ],
             ),
-
-            Expanded(child: RightScreen(allPolygons: allPolygons)),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

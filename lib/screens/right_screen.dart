@@ -36,138 +36,150 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
   Utility utility = Utility();
 
+  bool isNarrow = false;
+
   ///
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!appParamState.isMapCenterMove) {
-        moveMapCenterPosition();
+        moveMapCenterPosition(isNarrow: isNarrow);
       }
     });
 
-    return SafeArea(
-      child: Column(
-        children: <Widget>[
-          Stack(
+    return LayoutBuilder(
+      builder: (BuildContext contest, BoxConstraints constraints) {
+        if (constraints.maxWidth < 600) {
+          isNarrow = true;
+        } else {
+          isNarrow = false;
+        }
+
+        return SafeArea(
+          child: Column(
             children: <Widget>[
-              SizedBox(
-                height: context.screenSize.height,
-                child: FlutterMap(
-                  mapController: mapController,
-                  options: MapOptions(
-                    initialCenter: const LatLng(35.718532, 139.586639),
-                    initialZoom: currentZoomEightTeen,
-                    onPositionChanged: (MapCamera position, bool isMoving) {
-                      if (isMoving) {
-                        appParamNotifier.setCurrentZoom(zoom: position.zoom);
-                      }
-                    },
+              Stack(
+                children: <Widget>[
+                  SizedBox(
+                    height: context.screenSize.height,
+                    child: FlutterMap(
+                      mapController: mapController,
+                      options: MapOptions(
+                        initialCenter: const LatLng(35.718532, 139.586639),
+                        initialZoom: currentZoomEightTeen,
+                        onPositionChanged: (MapCamera position, bool isMoving) {
+                          if (isMoving) {
+                            appParamNotifier.setCurrentZoom(zoom: position.zoom);
+                          }
+                        },
+                      ),
+                      children: <Widget>[
+                        TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+
+                        if (widget.allPolygons != null) ...<Widget>[
+                          // ignore: always_specify_types
+                          PolygonLayer(polygons: makeAreaPolygons()),
+                        ],
+
+                        // ignore: always_specify_types
+                        PolylineLayer(polylines: makeDateRoutePolyline()),
+
+                        if (selectedSpotDataModelMarkerList.isNotEmpty) ...<Widget>[
+                          MarkerLayer(markers: selectedSpotDataModelMarkerList),
+                        ],
+
+                        if (templeMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: templeMarkerList)],
+                      ],
+                    ),
                   ),
-                  children: <Widget>[
-                    TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    left: 10,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      width: double.infinity,
+                      height: 130,
+                      padding: const EdgeInsets.all(10),
+                      child: DefaultTextStyle(
+                        style: TextStyle(fontSize: isNarrow ? 12 : 20, color: Colors.white),
+                        child: (appParamState.selectedSpotDataModel != null)
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[SelectableText(appParamState.selectedSpotDataModel!.name)],
+                              )
+                            : (selectedSpotDataModelList.isNotEmpty)
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(appParamState.selectedDate),
+                                  DefaultTextStyle(
+                                    style: TextStyle(fontSize: isNarrow ? 10 : 12, color: Colors.greenAccent),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Text(selectedSpotDataModelList[0].name),
+                                        const SizedBox(width: 20),
+                                        Text(selectedSpotDataModelList[selectedSpotDataModelList.length - 1].name),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemBuilder: (BuildContext context, int index) {
+                                        return (selectedSpotDataModelList[index].type == 'temple')
+                                            ? Text(selectedSpotDataModelList[index].name)
+                                            : const SizedBox.shrink();
+                                      },
+                                      itemCount: selectedSpotDataModelList.length,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
 
-                    if (widget.allPolygons != null) ...<Widget>[
-                      // ignore: always_specify_types
-                      PolygonLayer(polygons: makeAreaPolygons()),
-                    ],
+                  if (appParamState.selectedDate != '') ...<Widget>[
+                    Positioned(
+                      bottom: 20,
+                      right: 20,
+                      child: Row(
+                        children: <String>['S', 'A', 'B', 'C'].map((String e) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: GestureDetector(
+                              onTap: () {
+                                appParamNotifier.setDisplayTempleRankList(rank: e);
 
-                    // ignore: always_specify_types
-                    PolylineLayer(polylines: makeDateRoutePolyline()),
-
-                    if (selectedSpotDataModelMarkerList.isNotEmpty) ...<Widget>[
-                      MarkerLayer(markers: selectedSpotDataModelMarkerList),
-                    ],
-
-                    if (templeMarkerList.isNotEmpty) ...<Widget>[MarkerLayer(markers: templeMarkerList)],
+                                makeTempleMarkerList(isNarrow: isNarrow);
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: (appParamState.displayTempleRankList.contains(e))
+                                    ? Colors.orangeAccent.withValues(alpha: 0.6)
+                                    : Colors.redAccent.withValues(alpha: 0.6),
+                                child: Text(e, style: const TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ],
-                ),
+                ],
               ),
-              Positioned(
-                top: 10,
-                right: 10,
-                left: 10,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  width: double.infinity,
-                  height: 130,
-                  padding: const EdgeInsets.all(10),
-                  child: DefaultTextStyle(
-                    style: const TextStyle(fontSize: 20, color: Colors.white),
-                    child: (appParamState.selectedSpotDataModel != null)
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[SelectableText(appParamState.selectedSpotDataModel!.name)],
-                          )
-                        : (selectedSpotDataModelList.isNotEmpty)
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(appParamState.selectedDate),
-                              DefaultTextStyle(
-                                style: const TextStyle(fontSize: 12, color: Colors.greenAccent),
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(selectedSpotDataModelList[0].name),
-                                    const SizedBox(width: 20),
-                                    Text(selectedSpotDataModelList[selectedSpotDataModelList.length - 1].name),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: ListView.builder(
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return (selectedSpotDataModelList[index].type == 'temple')
-                                        ? Text(selectedSpotDataModelList[index].name)
-                                        : const SizedBox.shrink();
-                                  },
-                                  itemCount: selectedSpotDataModelList.length,
-                                ),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-
-              if (appParamState.selectedDate != '') ...<Widget>[
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: Row(
-                    children: <String>['S', 'A', 'B', 'C'].map((String e) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: GestureDetector(
-                          onTap: () {
-                            appParamNotifier.setDisplayTempleRankList(rank: e);
-
-                            makeTempleMarkerList();
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: (appParamState.displayTempleRankList.contains(e))
-                                ? Colors.orangeAccent.withValues(alpha: 0.6)
-                                : Colors.redAccent.withValues(alpha: 0.6),
-                            child: Text(e, style: const TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   ///
-  void moveMapCenterPosition() {
+  void moveMapCenterPosition({required bool isNarrow}) {
     getDataState.keepTempleList.where((TempleModel a) => a.date.yyyymmdd == appParamState.selectedDate).forEach((
       TempleModel element,
     ) {
@@ -187,13 +199,13 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
       appParamNotifier.setIsMapCenterMove(flag: true);
 
-      makeTempleMarkerList();
+      makeTempleMarkerList(isNarrow: isNarrow);
       makeSelectedSpotDataModelMarkerList();
     });
   }
 
   ///
-  void makeTempleMarkerList() {
+  void makeTempleMarkerList({required bool isNarrow}) {
     templeMarkerList.clear();
 
     final List<String> templeNames = <String>[];
@@ -224,7 +236,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                     longitude: value.lng,
                   ),
                 );
-                makeTempleMarkerList();
+                makeTempleMarkerList(isNarrow: isNarrow);
               },
               child:
                   (appParamState.selectedSpotDataModel?.latitude == value.lat &&
@@ -267,7 +279,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   longitude: element.lng,
                 ),
               );
-              makeTempleMarkerList();
+              makeTempleMarkerList(isNarrow: isNarrow);
             },
             child:
                 (appParamState.selectedSpotDataModel?.latitude == element.lat &&
@@ -311,7 +323,8 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                       longitude: value.lng,
                     ),
                   );
-                  makeTempleMarkerList();
+
+                  makeTempleMarkerList(isNarrow: isNarrow);
                 },
                 child:
                     (appParamState.selectedSpotDataModel?.latitude == value.lat &&
