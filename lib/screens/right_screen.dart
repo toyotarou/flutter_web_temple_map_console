@@ -86,7 +86,7 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                   children: <Widget>[
                     TileLayer(urlTemplate: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'),
                     // ignore: always_specify_types
-                    if (widget.allPolygons != null) ...<Widget>[PolygonLayer(polygons: makeAreaPolygons())],
+                    if (widget.allPolygons != null) PolygonLayer(polygons: makeAreaPolygons()),
                     // ignore: always_specify_types
                     PolylineLayer(polylines: makeDateRoutePolyline()),
                     if (selectedSpotDataModelMarkerList.isNotEmpty)
