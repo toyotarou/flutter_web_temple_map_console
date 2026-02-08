@@ -230,7 +230,11 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     if (appParamState.selectedSpotDataModel != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[SelectableText(appParamState.selectedSpotDataModel!.name)],
+        children: <Widget>[
+          SelectableText(
+            '${appParamState.selectedSpotDataModel!.name}\n${appParamState.selectedSpotDataModel!.address}\n${appParamState.selectedSpotDataModel!.latitude} / ${appParamState.selectedSpotDataModel!.longitude}',
+          ),
+        ],
       );
     }
 
