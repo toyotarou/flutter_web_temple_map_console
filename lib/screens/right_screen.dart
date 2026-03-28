@@ -63,8 +63,36 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
         );
 
         WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (!appParamState.isMapCenterMove) {
-            moveMapCenterPosition(isNarrow: isNarrow);
+          if (appParamState.selectedDate == '') {
+            // 初期状態 or リセット: マップを初期位置へ（一度だけ）
+            if (!appParamState.isMapCenterMove) {
+              mapController.move(const LatLng(35.718532, 139.586639), currentZoomEightTeen);
+              selectedSpotDataModelList.clear();
+              selectedSpotDataModelMarkerList.clear();
+              appParamNotifier.setIsMapCenterMove(flag: true);
+              if (mounted) {
+                setState(() {});
+              }
+              return;
+            }
+            // マーカー生成（データ読み込み後）
+            if (getDataState.keepTempleLatLngMap.isNotEmpty) {
+              if (appParamState.displayTempleRankList.isEmpty) {
+                appParamNotifier.setDefaultDisplayTempleRankList();
+                return;
+              }
+              if (templeMarkerList.isEmpty) {
+                makeTempleMarkerList(isNarrow: isNarrow);
+                if (mounted) {
+                  setState(() {});
+                }
+              }
+            }
+          } else {
+            // 日付選択状態
+            if (!appParamState.isMapCenterMove) {
+              moveMapCenterPosition(isNarrow: isNarrow);
+            }
           }
         });
 

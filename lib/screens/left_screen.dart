@@ -30,13 +30,16 @@ class _LeftScreenState extends ConsumerState<LeftScreen> with ControllersMixin<L
           padding: const EdgeInsets.all(8.0),
           child: GestureDetector(
             onTap: () {
-              appParamNotifier.setIsMapCenterMove(flag: false);
-
-              appParamNotifier.setSelectedDate(date: element.date.yyyymmdd);
-
-              appParamNotifier.setSelectedSpotDataModel();
-
-              appParamNotifier.setDefaultDisplayTempleRankList();
+              if (appParamState.selectedDate == element.date.yyyymmdd) {
+                appParamNotifier.setSelectedDate(date: '');
+                appParamNotifier.setIsMapCenterMove(flag: false);
+                appParamNotifier.setSelectedSpotDataModel();
+              } else {
+                appParamNotifier.setIsMapCenterMove(flag: false);
+                appParamNotifier.setSelectedDate(date: element.date.yyyymmdd);
+                appParamNotifier.setSelectedSpotDataModel();
+                appParamNotifier.setDefaultDisplayTempleRankList();
+              }
             },
 
             child: Container(
