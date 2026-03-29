@@ -38,10 +38,22 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
   Utility utility = Utility();
 
+  final ScrollController _timelineScrollController = ScrollController();
+
+  int? _expandedIndex;
+  bool _timelineVisible = true;
+
   static const double _cellWidth = 120;
   static const double _collapsedHeight = 70;
   static const double _expandedHeight = 260;
   static const double _buttonHeight = 40;
+
+  ///
+  @override
+  void dispose() {
+    _timelineScrollController.dispose();
+    super.dispose();
+  }
 
   ///
   @override
@@ -171,63 +183,150 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
 
               if (isNarrow && timelineItems.isNotEmpty) ...<Widget>[
                 Positioned(
+                  key: const ValueKey<String>('temple-timeline'),
                   bottom: 0,
                   right: 0,
                   left: 0,
-                  child: SizedBox(
-                    height: _expandedHeight,
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        dragDevices: <PointerDeviceKind>{
-                          PointerDeviceKind.touch,
-                          PointerDeviceKind.mouse,
-                          PointerDeviceKind.trackpad,
-                        },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () => setState(() => _timelineVisible = !_timelineVisible),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          color: Colors.black.withValues(alpha: 0.6),
+                          child: Text(
+                            _timelineVisible ? '非表示にする' : '表示する',
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
                       ),
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        itemCount: timelineItems.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (BuildContext context, int index) {
-                          final _TimelineItem item = timelineItems[index];
 
-                          if (item is _YearHeaderItem) {
-                            return SizedBox(
-                              width: _cellWidth * 0.8,
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: Container(
-                                  height: _collapsedHeight,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(border: Border.all(width: 2), color: Colors.grey.shade300),
-                                  child: Text(
-                                    '${item.year} 年',
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-
-                          final TempleModel temple = (item as _TempleItem).temple;
-
-                          return SizedBox(
-                            width: _cellWidth,
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: _TempleCell(
-                                temple: temple,
-                                width: _cellWidth,
-                                collapsedHeight: _collapsedHeight,
-                                expandedHeight: _expandedHeight,
-                                buttonHeight: _buttonHeight,
+                      if (_timelineVisible) ...<Widget>[
+                        Container(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(
+                              dragDevices: <PointerDeviceKind>{
+                                PointerDeviceKind.touch,
+                                PointerDeviceKind.mouse,
+                                PointerDeviceKind.trackpad,
+                              },
+                            ),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                // ignore: always_specify_types
+                                children: List.generate(DateTime.now().year - 2014 + 1, (int i) {
+                                  final int year = 2014 + i;
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                                    child: GestureDetector(
+                                      onTap: () => _scrollToYear(year, timelineItems),
+                                      child: CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: Colors.orangeAccent.withValues(alpha: 0.7),
+                                        child: Text('$year', style: const TextStyle(color: Colors.white, fontSize: 10)),
+                                      ),
+                                    ),
+                                  );
+                                }),
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          ),
+                        ),
+
+                        GestureDetector(
+                          onTap: () => setState(() => _expandedIndex = null),
+                          child: Container(
+                            height: _expandedHeight,
+                            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.2)),
+                            padding: const EdgeInsets.only(top: 5),
+                            child: ScrollConfiguration(
+                              behavior: ScrollConfiguration.of(context).copyWith(
+                                dragDevices: <PointerDeviceKind>{
+                                  PointerDeviceKind.touch,
+                                  PointerDeviceKind.mouse,
+                                  PointerDeviceKind.trackpad,
+                                },
+                              ),
+                              child: ListView.separated(
+                                controller: _timelineScrollController,
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                itemCount: timelineItems.length,
+                                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final _TimelineItem item = timelineItems[index];
+
+                                  ///HHH
+                                  if (item is _YearHeaderItem) {
+                                    return SizedBox(
+                                      width: _cellWidth * 0.8,
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Container(
+                                          height: _collapsedHeight,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(width: 2),
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          child: Text(
+                                            '${item.year} 年',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  final TempleModel temple = (item as _TempleItem).temple;
+
+                                  return SizedBox(
+                                    width: _cellWidth,
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: _TempleCell(
+                                        temple: temple,
+                                        width: _cellWidth,
+                                        collapsedHeight: _collapsedHeight,
+                                        expandedHeight: _expandedHeight,
+                                        buttonHeight: _buttonHeight,
+                                        isExpanded: _expandedIndex == index,
+                                        onToggle: () {
+                                          setState(() {
+                                            _expandedIndex = (_expandedIndex == index) ? null : index;
+                                          });
+                                        },
+                                        onDetailTap: () {
+                                          if (appParamState.selectedDate == temple.date.yyyymmdd) {
+                                            appParamNotifier.setSelectedDate(date: '');
+                                            appParamNotifier.setIsMapCenterMove(flag: false);
+                                            appParamNotifier.setSelectedSpotDataModel();
+                                          } else {
+                                            appParamNotifier.setIsMapCenterMove(flag: false);
+                                            appParamNotifier.setSelectedDate(date: temple.date.yyyymmdd);
+                                            appParamNotifier.setSelectedSpotDataModel();
+                                            appParamNotifier.setDefaultDisplayTempleRankList();
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ], // if (_timelineVisible)
+                    ],
                   ),
                 ),
               ],
@@ -312,6 +411,26 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
     }
 
     return const SizedBox.shrink();
+  }
+
+  ///
+  void _scrollToYear(int year, List<_TimelineItem> items) {
+    double offset = 8; // ListView の horizontal padding 分
+    for (final _TimelineItem item in items) {
+      if (item is _YearHeaderItem && item.year == year) {
+        break;
+      }
+      if (item is _YearHeaderItem) {
+        offset += _cellWidth * 0.8 + 8; // YearHeader 幅 + separator
+      } else {
+        offset += _cellWidth + 8; // Temple 幅 + separator
+      }
+    }
+    _timelineScrollController.animateTo(
+      offset.clamp(0.0, _timelineScrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   ///
@@ -631,6 +750,9 @@ class _TempleCell extends StatefulWidget {
     required this.collapsedHeight,
     required this.expandedHeight,
     required this.buttonHeight,
+    required this.onDetailTap,
+    required this.isExpanded,
+    required this.onToggle,
   });
 
   final TempleModel temple;
@@ -638,6 +760,9 @@ class _TempleCell extends StatefulWidget {
   final double collapsedHeight;
   final double expandedHeight;
   final double buttonHeight;
+  final VoidCallback onDetailTap;
+  final bool isExpanded;
+  final VoidCallback onToggle;
 
   @override
   State<_TempleCell> createState() => _TempleCellState();
@@ -646,8 +771,6 @@ class _TempleCell extends StatefulWidget {
 ///////////////////////////////////////////////////////////////////////
 
 class _TempleCellState extends State<_TempleCell> {
-  bool _isExpanded = false;
-
   String get _dateString =>
       '${widget.temple.date.year.toString().padLeft(4, '0')}/'
       '${widget.temple.date.month.toString().padLeft(2, '0')}/'
@@ -656,10 +779,10 @@ class _TempleCellState extends State<_TempleCell> {
   ///
   @override
   Widget build(BuildContext context) {
-    final double height = _isExpanded ? widget.expandedHeight : widget.collapsedHeight;
+    final double height = widget.isExpanded ? widget.expandedHeight : widget.collapsedHeight;
 
     return GestureDetector(
-      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      onTap: widget.onToggle,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
@@ -667,7 +790,7 @@ class _TempleCellState extends State<_TempleCell> {
         height: height,
         decoration: BoxDecoration(border: Border.all(width: 2), color: Colors.green.shade100),
 
-        child: _isExpanded ? _buildExpanded() : _buildCollapsed(),
+        child: widget.isExpanded ? _buildExpanded() : _buildCollapsed(),
       ),
     );
   }
@@ -684,9 +807,9 @@ class _TempleCellState extends State<_TempleCell> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(_dateString, style: const TextStyle(fontSize: 12)),
+                Text(_dateString, style: const TextStyle(fontSize: 12, color: Colors.black)),
                 const SizedBox(height: 8),
-                Text(widget.temple.temple, style: const TextStyle(fontSize: 14)),
+                Text(widget.temple.temple, style: const TextStyle(fontSize: 12, color: Colors.black)),
               ],
             ),
           ),
@@ -696,7 +819,10 @@ class _TempleCellState extends State<_TempleCell> {
           child: Container(
             color: Colors.green.shade700,
             alignment: Alignment.center,
-            child: const Text('詳細を見る', style: TextStyle(color: Colors.white, fontSize: 12)),
+            child: GestureDetector(
+              onTap: () => widget.onDetailTap(),
+              child: const Text('詳細を見る', style: TextStyle(color: Colors.white, fontSize: 12)),
+            ),
           ),
         ),
       ],
@@ -714,11 +840,11 @@ class _TempleCellState extends State<_TempleCell> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(_dateString, style: const TextStyle(fontSize: 12)),
+            Text(_dateString, style: const TextStyle(fontSize: 12, color: Colors.black)),
             const SizedBox(height: 4),
             Text(
               widget.temple.temple,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 12, color: Colors.black),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
