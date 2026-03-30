@@ -11,6 +11,7 @@ import '../models/common/spot_data_model.dart';
 import '../models/temple_lat_lng_model.dart';
 import '../models/temple_list_model.dart';
 import '../models/temple_model.dart';
+import '../models/tokyo_train_model.dart';
 import '../utility/daily_spot_data_functions.dart';
 import '../utility/map_functions.dart';
 import '../utility/utility.dart';
@@ -41,7 +42,11 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
   final ScrollController _timelineScrollController = ScrollController();
 
   int? _expandedIndex;
-  bool _timelineVisible = true;
+  bool _timelineVisible = false;
+  bool _routeStationListVisible = false;
+  String? _selectedTrainName;
+  List<LatLng> _trainPolylinePoints = <LatLng>[];
+  TokyoStationModel? _selectedTrainStation;
 
   static const double _cellWidth = 120;
   static const double _collapsedHeight = 70;
@@ -129,6 +134,39 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                     if (widget.allPolygons != null) PolygonLayer(polygons: makeAreaPolygons()),
                     // ignore: always_specify_types
                     PolylineLayer(polylines: makeDateRoutePolyline()),
+                    if (_trainPolylinePoints.length >= 2)
+                      // ignore: always_specify_types
+                      PolylineLayer(
+                        // ignore: always_specify_types
+                        polylines: <Polyline>[
+                          // ignore: always_specify_types
+                          Polyline(
+                            points: _trainPolylinePoints,
+                            color: Colors.greenAccent.withValues(alpha: 0.4),
+                            strokeWidth: 20,
+                          ),
+                        ],
+                      ),
+                    if (_trainPolylinePoints.isNotEmpty)
+                      MarkerLayer(
+                        markers: _trainPolylinePoints.map((LatLng point) {
+                          final bool isSelected =
+                              _selectedTrainStation != null &&
+                              point.latitude == _selectedTrainStation!.lat &&
+                              point.longitude == _selectedTrainStation!.lng;
+                          return Marker(
+                            point: point,
+                            width: isSelected ? 30 : 8,
+                            height: isSelected ? 30 : 8,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.yellowAccent.withValues(alpha: 0.6) : Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     if (selectedSpotDataModelMarkerList.isNotEmpty)
                       MarkerLayer(markers: selectedSpotDataModelMarkerList),
                     if (templeMarkerList.isNotEmpty) MarkerLayer(markers: templeMarkerList),
@@ -191,17 +229,170 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      GestureDetector(
-                        onTap: () => setState(() => _timelineVisible = !_timelineVisible),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          color: Colors.black.withValues(alpha: 0.6),
-                          child: Text(
-                            _timelineVisible ? '非表示にする' : '表示する',
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                      Row(
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () => setState(() {
+                              _timelineVisible = !_timelineVisible;
+                              if (_timelineVisible) {
+                                _routeStationListVisible = false;
+                              }
+                            }),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              color: Colors.black.withValues(alpha: 0.6),
+                              child: Text(
+                                _timelineVisible ? '履歴を非表示' : '履歴を表示',
+                                style: const TextStyle(color: Colors.white, fontSize: 12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () => setState(() {
+                              _routeStationListVisible = !_routeStationListVisible;
+                              if (_routeStationListVisible) {
+                                _timelineVisible = false;
+                              }
+                            }),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              color: Colors.black.withValues(alpha: 0.6),
+                              child: Text(
+                                _routeStationListVisible ? '路線と駅を非表示' : '路線と駅を表示',
+                                style: const TextStyle(color: Colors.white, fontSize: 12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      if (_routeStationListVisible) ...<Widget>[
+                        SizedBox(
+                          width: double.infinity,
+                          height: 200,
+                          child: ColoredBox(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            child: ScrollConfiguration(
+                              behavior: ScrollConfiguration.of(context).copyWith(
+                                dragDevices: <PointerDeviceKind>{
+                                  PointerDeviceKind.touch,
+                                  PointerDeviceKind.mouse,
+                                  PointerDeviceKind.trackpad,
+                                },
+                              ),
+                              child: ListView.builder(
+                                itemCount: tokyoTrainState.tokyoTrainMap.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final TokyoTrainModel train = tokyoTrainState.tokyoTrainMap.values.toList()[index];
+                                  return Stack(
+                                    children: <Widget>[
+                                      Theme(
+                                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                        child: ExpansionTile(
+                                          collapsedBackgroundColor: Colors.white.withValues(alpha: 0.1),
+                                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                                          iconColor: Colors.white,
+                                          collapsedIconColor: Colors.white,
+                                          dense: true,
+
+                                          title: Text(
+                                            train.trainName,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          children: train.station.map((TokyoStationModel s) {
+                                            return Container(
+                                              margin: const EdgeInsets.only(left: 40, right: 10),
+                                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                border: Border(
+                                                  bottom: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: <Widget>[
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        if (_selectedTrainStation?.id == s.id) {
+                                                          _selectedTrainStation = null;
+                                                        } else {
+                                                          _selectedTrainStation = s;
+                                                        }
+                                                      });
+                                                    },
+                                                    child: CircleAvatar(
+                                                      radius: 15,
+                                                      backgroundColor: _selectedTrainStation?.id == s.id
+                                                          ? Colors.yellowAccent.withValues(alpha: 0.6)
+                                                          : Colors.black.withValues(alpha: 0.4),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(
+                                                      s.stationName,
+                                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '${s.lat} / ${s.lng}',
+                                                    style: const TextStyle(color: Colors.grey, fontSize: 10),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+
+                                      Positioned(
+                                        top: 4,
+                                        right: 60,
+                                        child: Row(
+                                          children: <Widget>[
+                                            IconButton(
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (_selectedTrainName == train.trainName) {
+                                                    _selectedTrainName = null;
+                                                    _trainPolylinePoints = <LatLng>[];
+                                                  } else {
+                                                    _selectedTrainName = train.trainName;
+                                                    _trainPolylinePoints = train.station
+                                                        .map((TokyoStationModel s) => LatLng(s.lat, s.lng))
+                                                        .toList();
+                                                  }
+                                                });
+                                                mapController.move(
+                                                  const LatLng(35.718532, 139.586639),
+                                                  currentZoomEightTeen,
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.stacked_line_chart,
+                                                color: _selectedTrainName == train.trainName
+                                                    ? Colors.greenAccent
+                                                    : Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
 
                       if (_timelineVisible) ...<Widget>[
                         Container(
@@ -261,7 +452,6 @@ class _RightScreenState extends ConsumerState<RightScreen> with ControllersMixin
                                 itemBuilder: (BuildContext context, int index) {
                                   final _TimelineItem item = timelineItems[index];
 
-                                  ///HHH
                                   if (item is _YearHeaderItem) {
                                     return SizedBox(
                                       width: _cellWidth * 0.8,
